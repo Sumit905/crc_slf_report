@@ -21,7 +21,6 @@ public class ResponseModel {
 	private Map<String, Long> dataCorrectionIncident;
 
 	public ResponseModel() {
-		super();
 	}
 
 	public ResponseModel(Map<String, Long> totalNoOfIncident, Map<String, Long> taskIncident,

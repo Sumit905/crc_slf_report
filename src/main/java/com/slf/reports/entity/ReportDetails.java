@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @SuppressWarnings("unused")
 public class ReportDetails {
@@ -32,16 +30,10 @@ public class ReportDetails {
 	@Lob
 	@Column
 	private String categorization;
-	
-	
-	
-	
 	public ReportDetails() {
-		super();
 	}
 	public ReportDetails(long reportId, String stream, LocalDate date, String incidentNo, String priority,
 			String categorization) {
-		super();
 		this.reportId = reportId;
 		this.stream = stream;
 		this.date = date;

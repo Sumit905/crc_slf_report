@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
+ <style>
+.badge{
+    position: absolute;
+    right:0;
+    margin: 0 5px;
+}
+</style>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SLF REPORT</title>
@@ -48,9 +55,11 @@
   $(document).ready(function(){
 	  $("button").click(function(){
 		  var dateFormat = "yyyy-mm-dd";
-		  
-		  var fromDate=(new Date($('#from').datepicker("getDate"))).toISOString().split('T')[0];
-		  var toDate=(new Date($('#to').datepicker("getDate"))).toISOString().split('T')[0];
+		  var fromDt = new Date($('#from').datepicker("getDate"));
+		  var toDt = new Date($('#to').datepicker("getDate"));
+		 
+		  var fromDate=convertDate(fromDt);
+		  var toDate=convertDate(toDt);
 		  
 	    $.ajax({url: "../slfReport?fromDate="+fromDate+"&toDate="+toDate,
 	    		type: 'GET',  
@@ -64,12 +73,21 @@
 			      $("#dataClarificationIncident").html(createTable(result.dataClarificationIncident));
 			      $("#dataCorrectionIncident").html(createTable(result.dataCorrectionIncident));
 			      
+			      $("#totalNoOfInidentTotal").text("Total no. "+getTotal(result.totalNoOfIncident));
+			      $("#taskIncidentTotal").text("Total no. "+getTotal(result.taskIncident));
+			      $("#openShiftIncidentTotal").text("Total no. "+getTotal(result.openShiftIncident));
+			      $("#landingIncidentTotal").text("Total no. "+getTotal(result.landingIncident));
+			      $("#batchesIncidentTotal").text("Total no. "+getTotal(result.batchesIncident));
+			      $("#idsIncidentTotal").text("Total no. "+getTotal(result.idsIncident));
+			      $("#dataClarificationIncidentTotal").text("Total no. "+getTotal(result.dataClarificationIncident));
+			      $("#dataCorrectionIncidentTotal").text("Total no. "+getTotal(result.dataCorrectionIncident));
 	    }});
 	    
 	  });
 	  
 	  function createTable(obj){
 		  var text= "<table class='table'><tr><th>Priority</th><th>Value</th></tr>";
+		  
 		    	for(var key in obj){
 		    		if(obj[key]=="0"){
 		    			text+="<tr><td>"+key+"</td><td>"+obj[key]+"</td></tr>"
@@ -80,6 +98,25 @@
   			text+="</table>";
   			return text;
 	  }
+	  function getTotal(obj){
+		  var total = 0;
+		  for(var key in obj){
+	    		if(obj[key]!="0"){
+	    			total += Number(obj[key]);
+	    		}
+	    	}
+		  return total;
+	  }
+	  function convertDate(date) {
+		  var yyyy = date.getFullYear().toString();
+		  var mm = (date.getMonth()+1).toString();
+		  var dd  = date.getDate().toString();
+
+		  var mmChars = mm.split('');
+		  var ddChars = dd.split('');
+
+		  return yyyy + '-' + (mmChars[1]?mm:"0"+mmChars[0]) + '-' + (ddChars[1]?dd:"0"+ddChars[0]);
+		}
 	});
   </script>
 </head>
@@ -98,50 +135,50 @@
 
 <div class="container mt-3">
 <div class="card">
-  <div class="card-header">Total Number of Incidents</div>
+  <div class="card-header">Total Number of Incidents   <span id="totalNoOfInidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="totalNoOfInident"></div>
 </div>
 </div>
 
 <div class="container">
 <div class="card">
-  <div class="card-header">Task Incidents</div>
+  <div class="card-header">Task Incidents<span id="taskIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="taskIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">Open Shift Incidents</div>
+  <div class="card-header">Open Shift Incidents<span id="openShiftIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="openShiftIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">Landing Incidents</div>
+  <div class="card-header">Landing Incidents<span id="landingIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="landingIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">Batches Incidents</div>
+  <div class="card-header">Batches Incidents<span id="batchesIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="batchesIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">IDRS Incidents</div>
+  <div class="card-header">IDRS Incidents<span id="idsIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="idsIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">Data Clarification  Incidents</div>
+  <div class="card-header">Data Clarification  Incidents<span id="dataClarificationIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="dataClarificationIncident"></div>
 </div>
 </div>
 <div class="container">
 <div class="card">
-  <div class="card-header">Data Correction Incidents</div>
+  <div class="card-header">Data Correction Incidents<span id="dataCorrectionIncidentTotal" class="badge bg-primary"></span></div>
   <div class="card-body" id="dataCorrectionIncident"></div>
 </div>
 </div>
