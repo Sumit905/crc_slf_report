@@ -70,7 +70,7 @@ public class ExcelRestController {
 				Map<Integer, String> headerDetails = new HashMap<Integer, String>();
 				if (sheet.getRow(0) != null) {
 					int noOfColumns = sheet.getRow(0).getPhysicalNumberOfCells();
-					for (int j = 0; j < sheet.getPhysicalNumberOfRows(); j++) {
+					for (int j = 0; j <= sheet.getPhysicalNumberOfRows(); j++) {
 						if (j == 0 && sheet.getRow(j) != null) {
 							for (int z = 0; z < noOfColumns; z++) {
 								sheet.getRow(j).getCell(z).getStringCellValue();
@@ -145,7 +145,6 @@ public class ExcelRestController {
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReport(@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
-		 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
 		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
 		 ResponseModel responseModel = new ResponseModel();
 		 
@@ -158,6 +157,7 @@ public class ExcelRestController {
 		 incident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Low".toUpperCase())).count());
 		 responseModel.setTotalNoOfIncident(incident);
 		 
+		 
 		 Map<String,Long> taskIncident = new HashMap<>();
 		 taskIncident.put("CTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("CH & CTASK".toUpperCase())).count());
 		 taskIncident.put("SCTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("SCTASK".toUpperCase())).count());
@@ -165,37 +165,42 @@ public class ExcelRestController {
 		 taskIncident.put("RITM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RITM".toUpperCase())).count());
 		 responseModel.setTaskIncident(taskIncident);
 		 
-		 
+		 slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "LANDING");
 		 Map<String,Long> landingIncident = new HashMap<>();
-		 landingIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Critical".toUpperCase())).filter(rec -> rec.getStream().equals("LANDING".toUpperCase())).count());
-		 landingIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Urgent".toUpperCase())).filter(rec -> rec.getStream().equals("LANDING".toUpperCase())).count());
-		 landingIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("High".toUpperCase())).filter(rec -> rec.getStream().equals("LANDING".toUpperCase())).count());
-		 landingIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Medium".toUpperCase())).filter(rec -> rec.getStream().equals("LANDING".toUpperCase())).count());
-		 landingIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Low".toUpperCase())).filter(rec -> rec.getStream().equals("LANDING".toUpperCase())).count());
+		 landingIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("CRITICAL".toUpperCase())).count());
+		 landingIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("URGENT".toUpperCase())).count());
+		 landingIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("HIGH".toUpperCase())).count());
+		 landingIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("MEDIUM".toUpperCase())).count());
+		 landingIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("LOW".toUpperCase())).count());
 		 responseModel.setLandingIncident(landingIncident);
 		 
+		 slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IDRS");
 		 Map<String,Long> idrsIncident = new HashMap<>();
-		 idrsIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Critical".toUpperCase())).filter(rec -> rec.getStream().equals("IDRS".toUpperCase())).count());
-		 idrsIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Urgent".toUpperCase())).filter(rec -> rec.getStream().equals("IDRS".toUpperCase())).count());
-		 idrsIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("High".toUpperCase())).filter(rec -> rec.getStream().equals("IDRS".toUpperCase())).count());
-		 idrsIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Medium".toUpperCase())).filter(rec -> rec.getStream().equals("IDRS".toUpperCase())).count());
-		 idrsIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Low".toUpperCase())).filter(rec -> rec.getStream().equals("IDRS".toUpperCase())).count());
+		 slfReportDetails.stream().filter(rec -> rec.getPriority().equalsIgnoreCase("HIGH")).forEach(action-> System.out.println(action.toString()));
+		 
+		 idrsIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("CRITICAL")).count());
+		 idrsIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("URGENT")).count());		 
+		 idrsIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("HIGH")).count());
+		 idrsIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("MEDIUM")).count());
+		 idrsIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("LOW")).count());
 		 responseModel.setIdsIncident(idrsIncident);
 		 
+		 slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "CRC-BATCHES");
 		 Map<String,Long> batchesIncident = new HashMap<>();
-		 batchesIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Critical".toUpperCase())).filter(rec -> rec.getStream().equals("CRC-BATCHES".toUpperCase())).count());
-		 batchesIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Urgent".toUpperCase())).filter(rec -> rec.getStream().equals("CRC-BATCHES".toUpperCase())).count());
-		 batchesIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("High".toUpperCase())).filter(rec -> rec.getStream().equals("CRC-BATCHES".toUpperCase())).count());
-		 batchesIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Medium".toUpperCase())).filter(rec -> rec.getStream().equals("CRC-BATCHES".toUpperCase())).count());
-		 batchesIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Low".toUpperCase())).filter(rec -> rec.getStream().equals("CRC-BATCHES".toUpperCase())).count());
+		 batchesIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("CRITICAL")).count());
+		 batchesIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("URGENT")).count());
+		 batchesIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("HIGH")).count());
+		 batchesIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("MEDIUM")).count());
+		 batchesIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("LOW")).count());
 		 responseModel.setBatchesIncident(batchesIncident);
 		 
+		 slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IPIX");
 		 Map<String,Long> openShiftIncident = new HashMap<>();
-		 openShiftIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Critical".toUpperCase())).filter(rec -> rec.getStream().equals("IPIX".toUpperCase())).count());
-		 openShiftIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Urgent".toUpperCase())).filter(rec -> rec.getStream().equals("IPIX".toUpperCase())).count());
-		 openShiftIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("High".toUpperCase())).filter(rec -> rec.getStream().equals("IPIX".toUpperCase())).count());
-		 openShiftIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Medium".toUpperCase())).filter(rec -> rec.getStream().equals("IPIX".toUpperCase())).count());
-		 openShiftIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Low".toUpperCase())).filter(rec -> rec.getStream().equals("IPIX".toUpperCase())).count());
+		 openShiftIncident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("CRITICAL")).count());
+		 openShiftIncident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("URGENT")).count());
+		 openShiftIncident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("HIGH")).count());
+		 openShiftIncident.put("Medium",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("MEDIUM")).count());
+		 openShiftIncident.put("Low",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("LOW")).count());
 		 responseModel.setOpenShiftIncident(openShiftIncident);
 		 
 		 Map<String,Long> dataClarificationIncident = new HashMap<>();
@@ -259,10 +264,14 @@ public class ExcelRestController {
 	
 	@GetMapping(path="slfReportConsumer",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer) {
-		 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetails();
-		 
-		 
+		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
+	}
+	
+	@GetMapping(path="slfReportConsumerByDate",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer,@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
+		
+		List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), consumer);
 		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	

@@ -12,5 +12,7 @@ public interface SlfReportService {
 	List<ReportDetails> fatchReportDetails();
 	
 	List<ReportDetails> fatchReportDetailsOnBasesOfDate(LocalDate fromDate,LocalDate toDate);
+	
+	List<ReportDetails> fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate fromDate,LocalDate toDate, String consumer);
 
 }

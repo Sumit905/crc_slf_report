@@ -28,4 +28,11 @@ public class SlfReportServiceImpl implements SlfReportService {
 		
 		return reportRepository.findAllByDateBetween(fromDate,toDate);
 	}
+
+	@Override
+	public List<ReportDetails> fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate fromDate, LocalDate toDate,
+			String consumer) {
+		
+		return reportRepository.findConsumerByDateBetween(fromDate,toDate,consumer);
+	}
 }
