@@ -73,7 +73,6 @@ public class ExcelRestController {
 					for (int j = 0; j <= sheet.getPhysicalNumberOfRows(); j++) {
 						if (j == 0 && sheet.getRow(j) != null) {
 							for (int z = 0; z < noOfColumns; z++) {
-								sheet.getRow(j).getCell(z).getStringCellValue();
 								headerDetails.put(z, sheet.getRow(j).getCell(z).getStringCellValue());
 							}
 						} else if (sheet.getRow(j) != null) {
