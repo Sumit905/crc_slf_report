@@ -89,9 +89,7 @@
 		  var text= "<table class='table'><tr><th>Priority</th><th>Value</th></tr>";
 		  
 		    	for(var key in obj){
-		    		if(obj[key]=="0"){
-		    			text+="<tr><td>"+key+"</td><td>"+obj[key]+"</td></tr>"
-		    		} else {
+		    		if(obj[key]!="0"){
 		    			text+="<tr style='background-color: rgba(72, 113, 248, 0.068);'><td>"+key+"</td><td>"+obj[key]+"</td></tr>"
 		    		}
 		    	}

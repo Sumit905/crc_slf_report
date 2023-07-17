@@ -33,10 +33,11 @@ public class ExcelRestController {
 
 	@Autowired
 	private SlfReportService slfReportService;
+	private final static List<String> sheetNames = new ArrayList<String>();
 
 	@PostMapping("excel")
 	public String excelReader(@RequestParam("file") MultipartFile excel) throws ParseException {
-		List<String> sheetNames = new ArrayList<String>();
+		
 		try {
 			XSSFWorkbook workbook = new XSSFWorkbook(excel.getInputStream());
 
@@ -203,59 +204,15 @@ public class ExcelRestController {
 		 responseModel.setOpenShiftIncident(openShiftIncident);
 		 
 		 Map<String,Long> dataClarificationIncident = new HashMap<>();
-		 dataClarificationIncident.put("CAP-RM-MHS-SL1",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("RIX",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RIX".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("CAP-SEI-BIHSG_WBO-SL2",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("PRICERA",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Pricera".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("CRIPF",slfReportDetails.stream().filter(rec -> rec.getStream().equals("CRIPF".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("cripf tools (critical product information flow)",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("CUST - RRM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RRM".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("IXP/EDDA",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).count());
-		 dataClarificationIncident.put("IKEA POINT OF SALE",slfReportDetails.stream().filter(rec -> rec.getStream().equals("ipos - ikea point of sale".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("IFOOD",slfReportDetails.stream().filter(rec -> rec.getStream().equals("IFOOD".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("IIP(DATA POP)/CTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("IIP".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("ikea com",slfReportDetails.stream().filter(rec -> rec.getStream().equals("IKEA COM".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("ISELL",slfReportDetails.stream().filter(rec -> rec.getStream().equals("ISELL".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("PIA-FACTS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PIA-FACTS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("pcm (product change management)	",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PCM".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("SUPPORT TEAM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("SUPPORT TEAM".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("PTAG",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PTAG".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("PLUS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Plus".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("ROIG",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("sams (Service Action Management System)",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("SEKUND APPLICATION",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("DCI",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Digital Customer Integration".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("LCI",slfReportDetails.stream().filter(rec -> rec.getStream().equals("LCI".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("PIA",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PIA".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("MIX",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MIX".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("DSP",slfReportDetails.stream().filter(rec -> rec.getStream().equals("DSP".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("ICI",slfReportDetails.stream().filter(rec -> rec.getStream().equals("ICI".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("SCPIX",slfReportDetails.stream().filter(rec -> rec.getStream().equals("SCPIX".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("RIMS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("rims".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("Athena",slfReportDetails.stream().filter(rec -> rec.getStream().equals("CAP_INT(Athena)".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("IDSS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("idss platform".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("Support Planning-DWP",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Support Planning-DWP".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("Country Range",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Country Range".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("malaysia customs operation manae",slfReportDetails.stream().filter(rec -> rec.getStream().equals("malaysia customs operation mana".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("common landing area",slfReportDetails.stream().filter(rec -> rec.getStream().equals("common landing area".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("supply chain visibility",slfReportDetails.stream().filter(rec -> rec.getStream().equals("supply chain visibility".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("SALJA",slfReportDetails.stream().filter(rec -> rec.getStream().equals("salja".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("TCS-PSQD",slfReportDetails.stream().filter(rec -> rec.getStream().equals("TCS-PDSQ".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
-		 dataClarificationIncident.put("IKEA TRANSPORT MANAGEMENT",slfReportDetails.stream().filter(rec -> rec.getStream().equals("ikea transport management (itm)".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
+		 sheetNames.stream().forEach(sheetName -> {
+			 dataClarificationIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
+		 });
 		 responseModel.setDataClarificationIncident(dataClarificationIncident);
 		 
 		 Map<String,Long> dataCorrectionIncident = new HashMap<>();
-		 dataCorrectionIncident.put("CAP-RM-MHS-SL1",slfReportDetails.stream().filter(rec -> rec.getStream().equals("MHS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("RIX",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RIX".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("CUST - RRM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RRM".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("PTAG",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PTAG".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("SCPIX",slfReportDetails.stream().filter(rec -> rec.getStream().equals("SCPIX".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("ISELL",slfReportDetails.stream().filter(rec -> rec.getStream().equals("ISELL".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("Athena",slfReportDetails.stream().filter(rec -> rec.getStream().equals("CAP_INT(Athena)".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("IIP(DATA POP)/CTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("IIP".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataClarificationIncident.put("PLUS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Plus".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataClarificationIncident.put("Country Range",slfReportDetails.stream().filter(rec -> rec.getStream().equals("Country Range".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
-		 dataCorrectionIncident.put("PIA-FACTS",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PIA-FACTS".toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
+		 sheetNames.stream().forEach(sheetName -> {
+			 dataCorrectionIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
+		 });
 		 responseModel.setDataCorrectionIncident(dataCorrectionIncident);
 		return new ResponseEntity<Object>(responseModel, HttpStatus.OK);
 	}
