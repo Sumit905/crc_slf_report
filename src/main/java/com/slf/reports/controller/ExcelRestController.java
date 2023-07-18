@@ -11,7 +11,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,42 +49,29 @@ public class ExcelRestController {
 				sheetNames.add(workbook.getSheetName(i));
 			}
 
-//			System.out.println("noOfsheets :: " + workbook.getNumberOfSheets());
-//			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-//				XSSFSheet sheet = workbook.getSheetAt(i);
-//				System.out.println(
-//						"Sheet no.  " + workbook.getSheetName(i) + "  noOfRows :: " + sheet.getPhysicalNumberOfRows());
-//
-//			}
+			System.out.println("noOfsheets :: " + workbook.getNumberOfSheets());
+			
+			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+				XSSFSheet sheet = workbook.getSheetAt(i);
+				System.out.println(
+						"Sheet no.  " + workbook.getSheetName(i) + "  noOfRows :: " + sheet.getPhysicalNumberOfRows());
+			}
 
 			// find header index
 			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 				XSSFSheet sheet = workbook.getSheetAt(i);
-//				if (sheet.getRow(0) != null) {
-//					int noOfColumns = sheet.getRow(0).getPhysicalNumberOfCells();
-//					Map<String, Integer> headerDetails = new HashMap<String, Integer>();
-//					for (int j = 0; j < noOfColumns; j++) {
-//						sheet.getRow(0).getCell(j).getStringCellValue();
-//						headerDetails.put(sheet.getRow(0).getCell(j).getStringCellValue(), j);
-//					}
-//					System.out.println("Sheet Name.  " + workbook.getSheetName(i));
-//					System.out.println("Headers Name.  ");
-//					System.out.println(headerDetails.toString());
-//				}
-
 				Map<Integer, String> headerDetails = new HashMap<Integer, String>();
-				if (sheet.getRow(0) != null) {
 					int noOfColumns = sheet.getRow(0).getPhysicalNumberOfCells();
 					for (int j = 0; j <= sheet.getPhysicalNumberOfRows(); j++) {
 						if (j == 0 && sheet.getRow(j) != null) {
 							for (int z = 0; z < noOfColumns; z++) {
 								headerDetails.put(z, sheet.getRow(j).getCell(z).getStringCellValue());
 							}
-						} else if (sheet.getRow(j) != null) {
+						} else if (sheet.getRow(j) != null) {							
 							ReportDetails details = new ReportDetails();
 							details.setStream(workbook.getSheetName(i));
-							for (int z = 0; z < noOfColumns; z++) {
-								switch (headerDetails.get(z).toUpperCase()) {
+							for (int z = 0; z < headerDetails.size(); z++) {
+								switch (headerDetails.get(z).trim().toUpperCase()) {
 								case "CATEGORIZATION":
 									if (sheet.getRow(j).getCell(z) != null) {
 										String value = sheet.getRow(j).getCell(z).getStringCellValue();
@@ -98,17 +89,25 @@ public class ExcelRestController {
 									break;
 								case "DATE":
 									if (sheet.getRow(j).getCell(z) != null) {
-										if(sheet.getRow(j).getCell(z).getCellType().name().equals("STRING") && sheet.getRow(j).getCell(z).getRawValue() != null) {
-											
-											System.out.println(sheet.getRow(j).getCell(z).getStringCellValue()+" :: "+workbook.getSheetName(i));
-											if(isValidFormat("yyyy/MM/dd",sheet.getRow(j).getCell(z).getStringCellValue()))
-											details.setDate(convertToLocalDateViaSqlDate(new SimpleDateFormat("yyyy/MM/dd").parse(sheet.getRow(j).getCell(z).getStringCellValue())));
-											if(isValidFormat("dd-MM-yyyy",sheet.getRow(j).getCell(z).getStringCellValue()))
-												details.setDate(convertToLocalDateViaSqlDate(new SimpleDateFormat("dd-MM-yyyy").parse(sheet.getRow(j).getCell(z).getStringCellValue())));
-										}else if(sheet.getRow(j).getCell(z).getDateCellValue() != null){
-											details.setDate(convertToLocalDateViaSqlDate(sheet.getRow(j).getCell(z).getDateCellValue()));
+										SimpleDateFormat targetDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+										DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+										if (sheet.getRow(j).getCell(z).getCellType() == CellType.NUMERIC
+												&& DateUtil.isCellDateFormatted(sheet.getRow(j).getCell(z))) {
+											Date date = sheet.getRow(j).getCell(z).getDateCellValue();
+											String formattedDate = targetDateFormat.format(date);
+											LocalDate localDate = LocalDate.parse(formattedDate, formatter);
+											details.setDate(localDate);
+										} else if (sheet.getRow(j).getCell(z).getCellType() == CellType.STRING) {
+											String cellValue = sheet.getRow(j).getCell(z).getStringCellValue();
+											try {
+												Date date = new SimpleDateFormat().parse(cellValue);
+												String formattedDate = targetDateFormat.format(date);
+												LocalDate localDate = LocalDate.parse(formattedDate, formatter);
+												details.setDate(localDate);
+											} catch (Exception e) {
+												// Not a valid date, skip
+											}
 										}
-										
 									}
 									break;
 								case "PRIORITY":
@@ -121,7 +120,7 @@ public class ExcelRestController {
 									break;
 								case "INC_NO":
 									if (sheet.getRow(j).getCell(z) != null)
-										details.setIncidentNo(sheet.getRow(j).getCell(z).getStringCellValue());
+										details.setIncidentNo(sheet.getRow(j).getCell(z).getStringCellValue().trim());
 									break;
 
 								}
@@ -129,10 +128,13 @@ public class ExcelRestController {
 							slfReportService.saveReportDetails(details);
 
 						}
+						else {
+							System.out.println(
+									"Sheet no.  " + workbook.getSheetName(i)+ " index :: "+j);
+
+						}
 
 					}
-
-				}
 
 			}
 
@@ -142,6 +144,8 @@ public class ExcelRestController {
 
 		return Arrays.toString(sheetNames.toArray());
 	}
+	
+	
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReport(@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
@@ -218,17 +222,28 @@ public class ExcelRestController {
 	}
 	
 	
-	@GetMapping(path="slfReportConsumer",produces=MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path="slfReport/consumer",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer) {
 		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetails();
 		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	
-	@GetMapping(path="slfReportConsumerByDate",produces=MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path="slfReport/consumer/date",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer,@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
 		
 		List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), consumer);
 		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
+	}
+	
+	
+	@GetMapping(path="slfReport/consumers",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Map<String,Long>> displaySlfReportByListOfConsumer() {
+		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetails();
+		 Map<String,Long> listOfConsumer = new HashMap<String, Long>();
+		 sheetNames.stream().forEach(sheetName ->
+			 listOfConsumer.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).count())
+		 );
+		 return new ResponseEntity<Map<String,Long>>(listOfConsumer, HttpStatus.OK);
 	}
 	
 	public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {

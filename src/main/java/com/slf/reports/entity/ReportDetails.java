@@ -9,6 +9,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
+import org.springframework.context.annotation.Primary;
+
+import com.sun.istack.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +29,7 @@ public class ReportDetails {
 	private long reportId;
 	private String stream;
 	private LocalDate date;
+	@NotNull
 	private String incidentNo;
 	private String priority;
 	@Lob
