@@ -6,8 +6,8 @@ import java.util.List;
 import com.slf.reports.entity.ReportDetails;
 
 public interface SlfReportService {
-	
-	ReportDetails saveReportDetails(ReportDetails reportDetails);
+
+	List<ReportDetails> saveReportDetails(List<ReportDetails> reportDetailsList);
 	
 	List<ReportDetails> fatchReportDetails();
 	

@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Builder
-@SuppressWarnings("unused")
 public class ReportDetails {
 	
 	@Id
@@ -32,8 +31,6 @@ public class ReportDetails {
 	@NotNull
 	private String incidentNo;
 	private String priority;
-	@Lob
-	@Column
 	private String categorization;
 	public ReportDetails() {
 	}

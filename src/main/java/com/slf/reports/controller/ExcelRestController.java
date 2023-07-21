@@ -58,6 +58,7 @@ public class ExcelRestController {
 			}
 
 			// find header index
+			List<ReportDetails> reportDetailsList = new ArrayList<>();
 			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 				XSSFSheet sheet = workbook.getSheetAt(i);
 				Map<Integer, String> headerDetails = new HashMap<Integer, String>();
@@ -67,9 +68,15 @@ public class ExcelRestController {
 							for (int z = 0; z < noOfColumns; z++) {
 								headerDetails.put(z, sheet.getRow(j).getCell(z).getStringCellValue());
 							}
-						} else if (sheet.getRow(j) != null) {							
+						} else {
+							if(sheet.getRow(j) == null) {
+								sheet.getRow(j);
+								continue;
+							}
+
 							ReportDetails details = new ReportDetails();
 							details.setStream(workbook.getSheetName(i));
+							
 							for (int z = 0; z < headerDetails.size(); z++) {
 								switch (headerDetails.get(z).trim().toUpperCase()) {
 								case "CATEGORIZATION":
@@ -125,22 +132,18 @@ public class ExcelRestController {
 
 								}
 							}
-							slfReportService.saveReportDetails(details);
-
+							reportDetailsList.add(details);
 						}
-						else {
-							System.out.println(
-									"Sheet no.  " + workbook.getSheetName(i)+ " index :: "+j);
-
-						}
-
 					}
-
 			}
+			reportDetailsList = slfReportService.saveReportDetails(reportDetailsList);
+			System.out.println(" Total Count :: "+ reportDetailsList.stream().count());
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 
 		return Arrays.toString(sheetNames.toArray());
 	}
