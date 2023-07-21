@@ -1,23 +1,8 @@
 package com.slf.reports.controller;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.slf.reports.entity.ReportDetails;
+import com.slf.reports.response.ResponseModel;
+import com.slf.reports.service.SlfReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,131 +13,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.slf.reports.entity.ReportDetails;
-import com.slf.reports.response.ResponseModel;
-import com.slf.reports.service.SlfReportService;;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ExcelRestController {
 
 	@Autowired
 	private SlfReportService slfReportService;
-	private final static List<String> sheetNames = new ArrayList<String>();
 
 	@PostMapping("excel")
-	public String excelReader(@RequestParam("file") MultipartFile excel) throws ParseException {
-		
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(excel.getInputStream());
-
-			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				sheetNames.add(workbook.getSheetName(i));
-			}
-
-			System.out.println("noOfsheets :: " + workbook.getNumberOfSheets());
-			
-			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				XSSFSheet sheet = workbook.getSheetAt(i);
-				System.out.println(
-						"Sheet no.  " + workbook.getSheetName(i) + "  noOfRows :: " + sheet.getPhysicalNumberOfRows());
-			}
-
-			// find header index
-			List<ReportDetails> reportDetailsList = new ArrayList<>();
-			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				XSSFSheet sheet = workbook.getSheetAt(i);
-				Map<Integer, String> headerDetails = new HashMap<Integer, String>();
-					int noOfColumns = sheet.getRow(0).getPhysicalNumberOfCells();
-					for (int j = 0; j <= sheet.getPhysicalNumberOfRows(); j++) {
-						if (j == 0 && sheet.getRow(j) != null) {
-							for (int z = 0; z < noOfColumns; z++) {
-								headerDetails.put(z, sheet.getRow(j).getCell(z).getStringCellValue());
-							}
-						} else {
-							if(sheet.getRow(j) == null) {
-								sheet.getRow(j);
-								continue;
-							}
-
-							ReportDetails details = new ReportDetails();
-							details.setStream(workbook.getSheetName(i));
-							
-							for (int z = 0; z < headerDetails.size(); z++) {
-								switch (headerDetails.get(z).trim().toUpperCase()) {
-								case "CATEGORIZATION":
-									if (sheet.getRow(j).getCell(z) != null) {
-										String value = sheet.getRow(j).getCell(z).getStringCellValue();
-										if(value.trim().toLowerCase().contains("data clarification")) {
-											value="Data Clarification".toUpperCase();
-										} else if(value.trim().toLowerCase().contains("data missing") || value.trim().toLowerCase().contains("data correction")) {
-											value="Data Correction".toUpperCase();
-										} else {
-											value = value.toUpperCase();
-										}
-										details.setCategorization(value);
-									} else {
-										details.setCategorization("Data Clarification".toUpperCase());
-									}
-									break;
-								case "DATE":
-									if (sheet.getRow(j).getCell(z) != null) {
-										SimpleDateFormat targetDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-										DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-										if (sheet.getRow(j).getCell(z).getCellType() == CellType.NUMERIC
-												&& DateUtil.isCellDateFormatted(sheet.getRow(j).getCell(z))) {
-											Date date = sheet.getRow(j).getCell(z).getDateCellValue();
-											String formattedDate = targetDateFormat.format(date);
-											LocalDate localDate = LocalDate.parse(formattedDate, formatter);
-											details.setDate(localDate);
-										} else if (sheet.getRow(j).getCell(z).getCellType() == CellType.STRING) {
-											String cellValue = sheet.getRow(j).getCell(z).getStringCellValue();
-											try {
-												Date date = new SimpleDateFormat().parse(cellValue);
-												String formattedDate = targetDateFormat.format(date);
-												LocalDate localDate = LocalDate.parse(formattedDate, formatter);
-												details.setDate(localDate);
-											} catch (Exception e) {
-												// Not a valid date, skip
-											}
-										}
-									}
-									break;
-								case "PRIORITY":
-									if (sheet.getRow(j).getCell(z) != null) {
-										details.setPriority(sheet.getRow(j).getCell(z).getStringCellValue().trim().toUpperCase());
-									} else {
-										details.setPriority("low".toUpperCase());
-									}
-									
-									break;
-								case "INC_NO":
-									if (sheet.getRow(j).getCell(z) != null)
-										details.setIncidentNo(sheet.getRow(j).getCell(z).getStringCellValue().trim());
-									break;
-
-								}
-							}
-							reportDetailsList.add(details);
-						}
-					}
-			}
-			reportDetailsList = slfReportService.saveReportDetails(reportDetailsList);
-			System.out.println(" Total Count :: "+ reportDetailsList.stream().count());
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-
-
-		return Arrays.toString(sheetNames.toArray());
+	public String excelReader(@RequestParam("file") MultipartFile excel) throws ParseException, IOException {
+		List<ReportDetails> reportDetailsList = slfReportService.saveReportDetails(excel);
+		return Arrays.toString(reportDetailsList.toArray());
 	}
 	
 	
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displaySlfReport(@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
-		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
+	public ResponseEntity<Object> displaySlfReport(@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate)
+			throws ParseException, IOException {
+		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
 		 ResponseModel responseModel = new ResponseModel();
 		 
 		 Map<String,Long> incident = new HashMap<>();
@@ -172,7 +60,7 @@ public class ExcelRestController {
 		 taskIncident.put("RITM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RITM".toUpperCase())).count());
 		 responseModel.setTaskIncident(taskIncident);
 		 
-		 List<ReportDetails> slfReportDetailsLanding = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "LANDING");
+		 List<ReportDetails> slfReportDetailsLanding = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "LANDING");
 		 Map<String,Long> landingIncident = new HashMap<>();
 		 landingIncident.put("Critical",slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals("CRITICAL".toUpperCase())).count());
 		 landingIncident.put("Urgent",slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals("URGENT".toUpperCase())).count());
@@ -181,7 +69,7 @@ public class ExcelRestController {
 		 landingIncident.put("Low",slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals("LOW".toUpperCase())).count());
 		 responseModel.setLandingIncident(landingIncident);
 		 
-		 List<ReportDetails> slfReportDetailsIdrs = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IDRS");
+		 List<ReportDetails> slfReportDetailsIdrs = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IDRS");
 		 Map<String,Long> idrsIncident = new HashMap<>();
 		 slfReportDetailsIdrs.stream().filter(rec -> rec.getPriority().equalsIgnoreCase("HIGH")).forEach(action-> System.out.println(action.toString()));
 		
@@ -192,7 +80,7 @@ public class ExcelRestController {
 		 idrsIncident.put("Low",calculateIncidentNo(slfReportDetailsIdrs,"LOW".toUpperCase()));
 		 responseModel.setIdsIncident(idrsIncident);
 		 
-		 List<ReportDetails> slfReportDetailsBatchs = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "CRC-BATCHES");
+		 List<ReportDetails> slfReportDetailsBatchs = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "CRC-BATCHES");
 		 Map<String,Long> batchesIncident = new HashMap<>();
 		 batchesIncident.put("Critical",calculateIncidentNo(slfReportDetailsBatchs,"CRITICAL"));
 		 batchesIncident.put("Urgent",calculateIncidentNo(slfReportDetailsBatchs,"URGENT"));
@@ -201,7 +89,7 @@ public class ExcelRestController {
 		 batchesIncident.put("Low",calculateIncidentNo(slfReportDetailsBatchs,"LOW"));
 		 responseModel.setBatchesIncident(batchesIncident);
 		 
-		 List<ReportDetails> slfReportDetailsOpen = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IPIX");
+		 List<ReportDetails> slfReportDetailsOpen = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), "IPIX");
 		 Map<String,Long> openShiftIncident = new HashMap<>();
 		 openShiftIncident.put("Critical",calculateIncidentNo(slfReportDetailsOpen,"CRITICAL"));
 		 openShiftIncident.put("Urgent",calculateIncidentNo(slfReportDetailsOpen,"URGENT"));
@@ -211,13 +99,13 @@ public class ExcelRestController {
 		 responseModel.setOpenShiftIncident(openShiftIncident);
 		 
 		 Map<String,Long> dataClarificationIncident = new HashMap<>();
-		 sheetNames.stream().forEach(sheetName -> {
+		 slfReportService.fetchSheetNames().stream().forEach(sheetName -> {
 			 dataClarificationIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
 		 });
 		 responseModel.setDataClarificationIncident(dataClarificationIncident);
 		 
 		 Map<String,Long> dataCorrectionIncident = new HashMap<>();
-		 sheetNames.stream().forEach(sheetName -> {
+		slfReportService.fetchSheetNames().stream().forEach(sheetName -> {
 			 dataCorrectionIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
 		 });
 		 responseModel.setDataCorrectionIncident(dataCorrectionIncident);
@@ -227,24 +115,24 @@ public class ExcelRestController {
 	
 	@GetMapping(path="slfReport/consumer",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer) {
-		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetails();
+		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetails();
 		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	
 	@GetMapping(path="slfReport/consumer/date",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer,@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
 		
-		List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), consumer);
+		List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), consumer);
 		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	
 	
 	@GetMapping(path="slfReport/consumers",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Map<String,Long>> displaySlfReportByListOfConsumer() {
-		 List<ReportDetails> slfReportDetails = slfReportService.fatchReportDetails();
+	public ResponseEntity<Map<String,Long>> displaySlfReportByListOfConsumer() throws ParseException, IOException {
+		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetails();
 		 Map<String,Long> listOfConsumer = new HashMap<String, Long>();
-		 sheetNames.stream().forEach(sheetName ->
-			 listOfConsumer.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).count())
+		 slfReportService.fetchSheetNames().stream().forEach(sheetName ->
+			 listOfConsumer.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName)).count())
 		 );
 		 return new ResponseEntity<Map<String,Long>>(listOfConsumer, HttpStatus.OK);
 	}

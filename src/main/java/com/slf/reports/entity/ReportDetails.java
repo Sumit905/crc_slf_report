@@ -31,6 +31,7 @@ public class ReportDetails {
 	@NotNull
 	private String incidentNo;
 	private String priority;
+	@Lob
 	private String categorization;
 	public ReportDetails() {
 	}
