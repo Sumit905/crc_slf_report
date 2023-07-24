@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import com.slf.reports.entity.ReportDetails;
+import com.slf.reports.response.StackedColumnModel;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface SlfReportService {
@@ -19,5 +21,7 @@ public interface SlfReportService {
 	List<ReportDetails> fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate fromDate,LocalDate toDate, String consumer);
 
 	List<String> fetchSheetNames() throws ParseException, IOException;
+
+	List<StackedColumnModel> getStackedColumnDetails(Map<String,String> dateListMap);
 
 }

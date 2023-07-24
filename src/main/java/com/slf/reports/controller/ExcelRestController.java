@@ -2,6 +2,7 @@ package com.slf.reports.controller;
 
 import com.slf.reports.entity.ReportDetails;
 import com.slf.reports.response.ResponseModel;
+import com.slf.reports.response.StackedColumnModel;
 import com.slf.reports.service.SlfReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,7 +36,13 @@ public class ExcelRestController {
 		List<ReportDetails> reportDetailsList = slfReportService.saveReportDetails(excel);
 		return Arrays.toString(reportDetailsList.toArray());
 	}
-	
+
+
+	@PostMapping(path="slfReport/stacked-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displaySlfStackedChart(@RequestParam("dateList")Map<String,String> dateListMap){
+		List<StackedColumnModel> data = new ArrayList<>();
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
 	
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
@@ -42,9 +50,11 @@ public class ExcelRestController {
 			throws ParseException, IOException {
 		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
 		 ResponseModel responseModel = new ResponseModel();
+
+
+
 		 
 		 Map<String,Long> incident = new HashMap<>();
-		 
 		 incident.put("Critical",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Critical".toUpperCase())).count());
 		 incident.put("Urgent",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("Urgent".toUpperCase())).count());
 		 incident.put("High",slfReportDetails.stream().filter(rec -> rec.getPriority().equals("High".toUpperCase())).count());
