@@ -8,9 +8,6 @@ public class StackedColumnModel {
     private String name;
     private String showInLegend;
     private String yValueFormatString;
-
-    private String indexLabel;
-
     private List<?> dataPoints;
 
     public String getType() {
@@ -53,11 +50,4 @@ public class StackedColumnModel {
         this.dataPoints = dataPoints;
     }
 
-    public String getIndexLabel() {
-        return indexLabel;
-    }
-
-    public void setIndexLabel(String indexLabel) {
-        this.indexLabel = indexLabel;
-    }
 }
