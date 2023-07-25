@@ -1,6 +1,8 @@
 package com.slf.reports.controller;
 
 import com.slf.reports.entity.ReportDetails;
+import com.slf.reports.request.DateRequest;
+import com.slf.reports.request.WeeklyRequestParam;
 import com.slf.reports.response.ResponseModel;
 import com.slf.reports.response.StackedColumnModel;
 import com.slf.reports.service.SlfReportService;
@@ -10,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +21,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,15 +34,15 @@ public class ExcelRestController {
 	private SlfReportService slfReportService;
 
 	@PostMapping("excel")
-	public String excelReader(@RequestParam("file") MultipartFile excel) throws ParseException, IOException {
+	public ResponseEntity<String> excelReader(@RequestParam("file") MultipartFile excel) throws ParseException, IOException {
 		List<ReportDetails> reportDetailsList = slfReportService.saveReportDetails(excel);
-		return Arrays.toString(reportDetailsList.toArray());
+		return new ResponseEntity<String>("Excel file imported successfully.", HttpStatus.OK);
 	}
 
 
 	@PostMapping(path="slfReport/stacked-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displaySlfStackedChart(@RequestParam("dateList")Map<String,String> dateListMap){
-		List<StackedColumnModel> data = new ArrayList<>();
+	public ResponseEntity<Object> displaySlfStackedChart(@RequestBody DateRequest dateList){
+		List<StackedColumnModel> data = slfReportService.getStackedColumnDetails(dateList);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
 	

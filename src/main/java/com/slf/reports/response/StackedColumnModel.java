@@ -4,25 +4,13 @@ import java.util.List;
 
 public class StackedColumnModel {
 
-    //		{
-    //			: "stackedColumn",
-    //		    name: "Anthracite and Bituminous",
-    //				showInLegend: "true",
-    //				yValueFormatString: " ## incidents",
-    //				dataPoints: [
-    //			{ y: 111338 , label: "USA" },
-    //			{ y: 49088, label: "Russia" },
-    //			{ y: 62200, label: "China" },
-    //			{ y: 90085, label: "India" },
-    //			{ y: 38600, label: "Australia" },
-    //			{ y: 48750, label: "SA" }
-    //		]
-    //		}
-
     private String type;
     private String name;
     private String showInLegend;
     private String yValueFormatString;
+
+    private String indexLabel;
+
     private List<?> dataPoints;
 
     public String getType() {
@@ -63,5 +51,13 @@ public class StackedColumnModel {
 
     public void setDataPoints(List<?> dataPoints) {
         this.dataPoints = dataPoints;
+    }
+
+    public String getIndexLabel() {
+        return indexLabel;
+    }
+
+    public void setIndexLabel(String indexLabel) {
+        this.indexLabel = indexLabel;
     }
 }

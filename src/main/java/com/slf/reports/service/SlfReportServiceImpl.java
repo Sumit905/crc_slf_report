@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.slf.reports.ExcelFileReader;
+import com.slf.reports.request.DateRequest;
 import com.slf.reports.response.DataPointsModel;
 import com.slf.reports.response.StackedColumnModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,36 +73,36 @@ class SlfReportServiceImpl implements SlfReportService {
 	}
 
 	@Override
-	public List<StackedColumnModel> getStackedColumnDetails(Map<String, String> dateListMap) {
+	public List<StackedColumnModel> getStackedColumnDetails(DateRequest dateRequest) {
 
 		List<StackedColumnModel> data = new ArrayList<>();
 		StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
 		criticalStackedColumnModel.setType("stackedColumn");
 		criticalStackedColumnModel.setName("Critical");
 		criticalStackedColumnModel.setShowInLegend("true");
-		criticalStackedColumnModel.setyValueFormatString("## incidents");
+		criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
 		StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
 		urgentStackedColumnModel.setType("stackedColumn");
 		urgentStackedColumnModel.setName("Urgent");
 		urgentStackedColumnModel.setShowInLegend("true");
-		urgentStackedColumnModel.setyValueFormatString("## incidents");
+		urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
 		StackedColumnModel highStackedColumnModel = new StackedColumnModel();
 		highStackedColumnModel.setType("stackedColumn");
 		highStackedColumnModel.setName("High");
 		highStackedColumnModel.setShowInLegend("true");
-		highStackedColumnModel.setyValueFormatString("## incidents");
+		highStackedColumnModel.setyValueFormatString("## High Incidents");
 
 		StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
 		mediumStackedColumnModel.setType("stackedColumn");
 		mediumStackedColumnModel.setName("Medium");
 		mediumStackedColumnModel.setShowInLegend("true");
-		mediumStackedColumnModel.setyValueFormatString("## incidents");
+		mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
 
 		StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
 		lowStackedColumnModel.setType("stackedColumn");
 		lowStackedColumnModel.setName("Low");
 		lowStackedColumnModel.setShowInLegend("true");
-		lowStackedColumnModel.setyValueFormatString("## incidents");
+		lowStackedColumnModel.setyValueFormatString("## Low Incidents");
 
 
 		List<DataPointsModel> criticalDataPoint = new ArrayList<>();
@@ -109,29 +110,27 @@ class SlfReportServiceImpl implements SlfReportService {
 		List<DataPointsModel> highDataPoint = new ArrayList<>();
 		List<DataPointsModel> mediumDataPoint = new ArrayList<>();
 		List<DataPointsModel> lowDataPoint = new ArrayList<>();
-		dateListMap.entrySet().stream().forEach(rec -> {
+		dateRequest.getWeeklyRequestParamList().stream().forEach(rec -> {
 			DataPointsModel dataPointsModel = new DataPointsModel();
-			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(LocalDate.parse(rec.getKey()), LocalDate.parse(rec.getValue()));
-			dataPointsModel.setY(""+slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase())).count());
-			dataPointsModel.setLabel(rec.getKey()+" - "+rec.getValue());
+			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase())).count());
+			dataPointsModel.setLabel(rec.getFromDate()+" - "+rec.getToDate());
 			criticalDataPoint.add(dataPointsModel);
-
-			dataPointsModel.setY(""+slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Urgent".toUpperCase())).count());
-			dataPointsModel.setLabel(rec.getKey()+" - "+rec.getValue());
+			dataPointsModel = new DataPointsModel();
+			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Urgent".toUpperCase())).count());
+			dataPointsModel.setLabel(rec.getFromDate()+" - "+rec.getToDate());
 			urgentDataPoint.add(dataPointsModel);
-
-
-			dataPointsModel.setY(""+slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count());
-			dataPointsModel.setLabel(rec.getKey()+" - "+rec.getValue());
+			dataPointsModel = new DataPointsModel();
+			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count());
+			dataPointsModel.setLabel(rec.getFromDate()+" - "+rec.getToDate());
 			highDataPoint.add(dataPointsModel);
-
-
-			dataPointsModel.setY(""+slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Medium".toUpperCase())).count());
-			dataPointsModel.setLabel(rec.getKey()+" - "+rec.getValue());
+			dataPointsModel = new DataPointsModel();
+			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Medium".toUpperCase())).count());
+			dataPointsModel.setLabel(rec.getFromDate()+" - "+rec.getToDate());
 			mediumDataPoint.add(dataPointsModel);
-
-			dataPointsModel.setY(""+slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count());
-			dataPointsModel.setLabel(rec.getKey()+" - "+rec.getValue());
+			dataPointsModel = new DataPointsModel();
+			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count());
+			dataPointsModel.setLabel(rec.getFromDate()+" - "+rec.getToDate());
 			lowDataPoint.add(dataPointsModel);
 
 		});

@@ -1,14 +1,14 @@
 package com.slf.reports.response;
 
 public class DataPointsModel {
-    private String y;
+    private Long y;
     private String label;
 
-    public String getY() {
+    public Long getY() {
         return y;
     }
 
-    public void setY(String y) {
+    public void setY(Long y) {
         this.y = y;
     }
 
