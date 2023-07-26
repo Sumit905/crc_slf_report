@@ -24,6 +24,6 @@ public interface SlfReportService {
 
 	List<String> fetchSheetNames() throws ParseException, IOException;
 
-	List<StackedColumnModel> getStackedColumnDetails(DateRequest dateRequest);
+	List<StackedColumnModel> getStackedColumnDetails(int year);
 
 }

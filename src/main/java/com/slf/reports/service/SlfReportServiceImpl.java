@@ -13,15 +13,15 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.slf.reports.ExcelFileReader;
-import com.slf.reports.request.DateRequest;
 import com.slf.reports.response.DataPointsModel;
 import com.slf.reports.response.StackedColumnModel;
+import com.slf.reports.response.StackedColumnModel;
+import com.slf.reports.utils.FridayAndThursdayDates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.slf.reports.entity.ReportDetails;
 import com.slf.reports.repository.SlfReportRepository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -73,7 +73,7 @@ class SlfReportServiceImpl implements SlfReportService {
 	}
 
 	@Override
-	public List<StackedColumnModel> getStackedColumnDetails(DateRequest dateRequest) {
+	public List<StackedColumnModel> getStackedColumnDetails(int year) {
 
 		List<StackedColumnModel> data = new ArrayList<>();
 		StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
@@ -110,7 +110,8 @@ class SlfReportServiceImpl implements SlfReportService {
 		List<DataPointsModel> highDataPoint = new ArrayList<>();
 		List<DataPointsModel> mediumDataPoint = new ArrayList<>();
 		List<DataPointsModel> lowDataPoint = new ArrayList<>();
-		dateRequest.getWeeklyRequestParamList().stream().forEach(rec -> {
+
+		FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
 			DataPointsModel dataPointsModel = new DataPointsModel();
 			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
 			dataPointsModel.setY(slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase())).count());
