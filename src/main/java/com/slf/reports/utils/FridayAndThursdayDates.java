@@ -20,10 +20,10 @@ public class FridayAndThursdayDates {
                                     .with(TemporalAdjusters.firstInMonth(DayOfWeek.FRIDAY));
         while (friday.getYear() == year && friday.compareTo(currentDate)<=0) {
             WeeklyRequestParam weeklyRequestParam = new WeeklyRequestParam();
-            System.out.println("Friday in " + friday.getYear() + ": " + friday);
+            //System.out.println("Friday in " + friday.getYear() + ": " + friday);
             // Find the year and date of the coming week's Thursday
             LocalDate nextThursday = friday.with(TemporalAdjusters.next(DayOfWeek.THURSDAY));
-            System.out.println("Thursday in " + friday.getYear() + ": " + nextThursday);
+           // System.out.println("Thursday in " + friday.getYear() + ": " + nextThursday);
             weeklyRequestParam.setFromDate(friday);
             weeklyRequestParam.setToDate(nextThursday);
             weeklyDays.add(weeklyRequestParam);

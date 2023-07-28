@@ -9,6 +9,8 @@ import java.util.Map;
 import com.slf.reports.entity.ReportDetails;
 import com.slf.reports.request.DateRequest;
 import com.slf.reports.request.WeeklyRequestParam;
+import com.slf.reports.response.HeaderDetails;
+import com.slf.reports.response.Result;
 import com.slf.reports.response.StackedColumnModel;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,5 +27,7 @@ public interface SlfReportService {
 	List<String> fetchSheetNames() throws ParseException, IOException;
 
 	List<StackedColumnModel> getStackedColumnDetails(int year);
+
+	Result fetchTableHeaderDetails(int year);
 
 }

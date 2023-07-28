@@ -4,17 +4,20 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.slf.reports.ExcelFileReader;
 import com.slf.reports.response.DataPointsModel;
-import com.slf.reports.response.StackedColumnModel;
+import com.slf.reports.response.HeaderDetails;
+import com.slf.reports.response.Result;
 import com.slf.reports.response.StackedColumnModel;
 import com.slf.reports.utils.FridayAndThursdayDates;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,5 +149,59 @@ class SlfReportServiceImpl implements SlfReportService {
 		data.add(mediumStackedColumnModel);
 		data.add(lowStackedColumnModel);
 		return data;
+	}
+
+	public Result fetchTableHeaderDetails(int year){
+		List<HeaderDetails> headerDetails = new ArrayList<>();
+		HeaderDetails headerDetail = new HeaderDetails();
+		headerDetail.setHeaderName("Priority");
+		headerDetail.setField("priority");
+		headerDetail.setPinned("left");
+		headerDetails.add(headerDetail);
+
+		AtomicInteger i= new AtomicInteger();
+
+		List<Map<String, String>> rowDetails = new ArrayList<>();
+		Map<String, String> criticalMap =  new HashMap<>();
+		Map<String, String> urgentMap =  new HashMap<>();
+		Map<String, String> highMap =  new HashMap<>();
+		Map<String, String> mediumMap =  new HashMap<>();
+		Map<String, String> lowMap =  new HashMap<>();
+
+		Map<String, String> ctaskMap =  new HashMap<>();
+
+
+		List<Map<String,String>> taskIncidentList = new ArrayList<>();
+		criticalMap.put("priority","Critical");
+		urgentMap.put("priority","Urgent");
+		highMap.put("priority","High");
+		mediumMap.put("priority","Medium");
+		lowMap.put("priority","Low");
+
+
+
+
+
+		FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+			HeaderDetails details = new HeaderDetails();
+			details.setHeaderName(rec.getFromDate()+" - "+rec.getToDate());
+			details.setField("W"+ (i.incrementAndGet()));
+			headerDetails.add(details);
+			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+			criticalMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase())).count()+"");
+			urgentMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Urgent".toUpperCase())).count()+"");
+			highMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count()+"");
+			mediumMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Medium".toUpperCase())).count()+"");
+			lowMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count()+"");
+		});
+		rowDetails.add(criticalMap);
+		rowDetails.add(urgentMap);
+		rowDetails.add(highMap);
+		rowDetails.add(mediumMap);
+		rowDetails.add(lowMap);
+		Result result = new Result();
+		result.setColumnDef(headerDetails);
+		result.setRowData(rowDetails);
+      return result;
 	}
 }
