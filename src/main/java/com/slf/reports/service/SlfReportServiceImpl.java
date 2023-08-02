@@ -204,4 +204,161 @@ class SlfReportServiceImpl implements SlfReportService {
 		result.setRowData(rowDetails);
       return result;
 	}
+
+	public Result fetchTaskDetails(int year){
+		List<HeaderDetails> headerDetails = new ArrayList<>();
+		HeaderDetails headerDetail = new HeaderDetails();
+		headerDetail.setHeaderName("Tasks");
+		headerDetail.setField("priority");
+		headerDetail.setPinned("left");
+		headerDetails.add(headerDetail);
+
+		AtomicInteger i= new AtomicInteger();
+
+		List<Map<String, String>> rowDetails = new ArrayList<>();
+		Map<String, String> ctaskMap =  new HashMap<>();
+		Map<String, String> sctaskMap =  new HashMap<>();
+		Map<String, String> ptaskMap =  new HashMap<>();
+		Map<String, String> ritmMap =  new HashMap<>();
+		Map<String, String> prbMap =  new HashMap<>();
+
+
+		List<Map<String,String>> taskIncidentList = new ArrayList<>();
+		ctaskMap.put("priority","CTASK");
+		sctaskMap.put("priority","SCTASK");
+		ptaskMap.put("priority","PTASK");
+		ritmMap.put("priority","RITM");
+		prbMap.put("priority","PRB");
+
+
+
+
+
+		FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+			HeaderDetails details = new HeaderDetails();
+			details.setHeaderName(rec.getFromDate()+" - "+rec.getToDate());
+			details.setField("W"+ (i.incrementAndGet()));
+			headerDetails.add(details);
+			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+			ctaskMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getStream().equals("CH & CTASK".toUpperCase())).count()+"");
+			sctaskMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getStream().equals("SCTASK".toUpperCase())).count()+"");
+			ptaskMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getStream().equals("PTASK".toUpperCase())).count()+"");
+			ritmMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getStream().equals("RITM".toUpperCase())).count()+"");
+			prbMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getStream().equals("PRB".toUpperCase())).count()+"");
+		});
+		rowDetails.add(ctaskMap);
+		rowDetails.add(sctaskMap);
+		rowDetails.add(ptaskMap);
+		rowDetails.add(ritmMap);
+		rowDetails.add(prbMap);
+		Result result = new Result();
+		result.setColumnDef(headerDetails);
+		result.setRowData(rowDetails);
+		return result;
+	}
+
+	public Result fetchOpenshiftTableDetails(int year){
+		List<HeaderDetails> headerDetails = new ArrayList<>();
+		HeaderDetails headerDetail = new HeaderDetails();
+		headerDetail.setHeaderName("Priority");
+		headerDetail.setField("priority");
+		headerDetail.setPinned("left");
+		headerDetails.add(headerDetail);
+
+		AtomicInteger i= new AtomicInteger();
+
+		List<Map<String, String>> rowDetails = new ArrayList<>();
+		Map<String, String> criticalMap =  new HashMap<>();
+		Map<String, String> urgentMap =  new HashMap<>();
+		Map<String, String> highMap =  new HashMap<>();
+		Map<String, String> mediumMap =  new HashMap<>();
+		Map<String, String> lowMap =  new HashMap<>();
+
+
+		List<Map<String,String>> taskIncidentList = new ArrayList<>();
+		criticalMap.put("priority","Critical");
+		urgentMap.put("priority","Urgent");
+		highMap.put("priority","High");
+		mediumMap.put("priority","Medium");
+		lowMap.put("priority","Low");
+
+
+
+
+
+		FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+			HeaderDetails details = new HeaderDetails();
+			details.setHeaderName(rec.getFromDate()+" - "+rec.getToDate());
+			details.setField("W"+ (i.incrementAndGet()));
+			headerDetails.add(details);
+			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+			criticalMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase()) && obj.getStream().equals("IPIX".toUpperCase())).count()+"");
+			urgentMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()) && obj.getStream().equals("IPIX".toUpperCase())).count()+"");
+			highMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase()) && obj.getStream().equals("IPIX".toUpperCase())).count()+"");
+			mediumMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Medium".toUpperCase()) && obj.getStream().equals("IPIX".toUpperCase())).count()+"");
+			lowMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase()) && obj.getStream().equals("IPIX".toUpperCase())).count()+"");
+		});
+		rowDetails.add(criticalMap);
+		rowDetails.add(urgentMap);
+		rowDetails.add(highMap);
+		rowDetails.add(mediumMap);
+		rowDetails.add(lowMap);
+		Result result = new Result();
+		result.setColumnDef(headerDetails);
+		result.setRowData(rowDetails);
+		return result;
+	}
+
+	public Result fetchLandingTableDetails(int year){
+		List<HeaderDetails> headerDetails = new ArrayList<>();
+		HeaderDetails headerDetail = new HeaderDetails();
+		headerDetail.setHeaderName("Priority");
+		headerDetail.setField("priority");
+		headerDetail.setPinned("left");
+		headerDetails.add(headerDetail);
+
+		AtomicInteger i= new AtomicInteger();
+
+		List<Map<String, String>> rowDetails = new ArrayList<>();
+		Map<String, String> criticalMap =  new HashMap<>();
+		Map<String, String> urgentMap =  new HashMap<>();
+		Map<String, String> highMap =  new HashMap<>();
+		Map<String, String> mediumMap =  new HashMap<>();
+		Map<String, String> lowMap =  new HashMap<>();
+
+
+		List<Map<String,String>> taskIncidentList = new ArrayList<>();
+		criticalMap.put("priority","Critical");
+		urgentMap.put("priority","Urgent");
+		highMap.put("priority","High");
+		mediumMap.put("priority","Medium");
+		lowMap.put("priority","Low");
+
+
+
+
+
+		FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+			HeaderDetails details = new HeaderDetails();
+			details.setHeaderName(rec.getFromDate()+" - "+rec.getToDate());
+			details.setField("W"+ (i.incrementAndGet()));
+			headerDetails.add(details);
+			List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+			criticalMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Critical".toUpperCase()) && obj.getStream().equals("LANDING".toUpperCase())).count()+"");
+			urgentMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()) && obj.getStream().equals("LANDING".toUpperCase())).count()+"");
+			highMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase()) && obj.getStream().equals("LANDING".toUpperCase())).count()+"");
+			mediumMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Medium".toUpperCase()) && obj.getStream().equals("LANDING".toUpperCase())).count()+"");
+			lowMap.put("W"+i,slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase()) && obj.getStream().equals("LANDING".toUpperCase())).count()+"");
+		});
+		rowDetails.add(criticalMap);
+		rowDetails.add(urgentMap);
+		rowDetails.add(highMap);
+		rowDetails.add(mediumMap);
+		rowDetails.add(lowMap);
+		Result result = new Result();
+		result.setColumnDef(headerDetails);
+		result.setRowData(rowDetails);
+		return result;
+	}
+
 }

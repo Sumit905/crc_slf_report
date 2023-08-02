@@ -54,6 +54,77 @@ $(document)
 
                                 }
                             });
+
+                            $.ajax({
+                                                            url : "../slfReport/task-details/"+selText,
+                                                            type : 'Post',
+                                                            success : function(result) {
+                                                                    var data = eval(result);
+                                                                    console.log(data.columnDef);
+                                                                    // specify the data
+
+                                                                    // let the grid know which columns and what data to use
+                                                                    var gridOptions = {
+                                                                    groupIncludeFooter: true,
+                                                                    groupIncludeTotalFooter: true,
+                                                                      animateRows: true,
+                                                                      columnDefs: data.columnDef,
+                                                                      rowData: data.rowData
+                                                                    };
+
+                                                                    // setup the grid after the page has finished loading
+                                                                     var gridDiv = document.querySelector('#taskIncident');
+                                                                      new agGrid.Grid(gridDiv, gridOptions);
+
+                                                            }
+                                                        });
+                            $.ajax({
+                                                                                        url : "../slfReport/openshift-details/"+selText,
+                                                                                        type : 'Post',
+                                                                                        success : function(result) {
+                                                                                                var data = eval(result);
+                                                                                                console.log(data.columnDef);
+                                                                                                // specify the data
+
+                                                                                                // let the grid know which columns and what data to use
+                                                                                                var gridOptions = {
+                                                                                                groupIncludeFooter: true,
+                                                                                                groupIncludeTotalFooter: true,
+                                                                                                  animateRows: true,
+                                                                                                  columnDefs: data.columnDef,
+                                                                                                  rowData: data.rowData
+                                                                                                };
+
+                                                                                                // setup the grid after the page has finished loading
+                                                                                                 var gridDiv = document.querySelector('#openShiftIncident');
+                                                                                                  new agGrid.Grid(gridDiv, gridOptions);
+
+                                                                                        }
+                                                                                    });
+
+                            $.ajax({
+                                                                                        url : "../slfReport/landing-details/"+selText,
+                                                                                        type : 'Post',
+                                                                                        success : function(result) {
+                                                                                                var data = eval(result);
+                                                                                                console.log(data.columnDef);
+                                                                                                // specify the data
+
+                                                                                                // let the grid know which columns and what data to use
+                                                                                                var gridOptions = {
+                                                                                                groupIncludeFooter: true,
+                                                                                                groupIncludeTotalFooter: true,
+                                                                                                  animateRows: true,
+                                                                                                  columnDefs: data.columnDef,
+                                                                                                  rowData: data.rowData
+                                                                                                };
+
+                                                                                                // setup the grid after the page has finished loading
+                                                                                                 var gridDiv = document.querySelector('#landingIncident');
+                                                                                                  new agGrid.Grid(gridDiv, gridOptions);
+
+                                                                                        }
+                                                                                    });
                    });
        });
 

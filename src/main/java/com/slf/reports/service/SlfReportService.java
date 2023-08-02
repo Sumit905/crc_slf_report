@@ -30,4 +30,10 @@ public interface SlfReportService {
 
 	Result fetchTableHeaderDetails(int year);
 
+	Result fetchTaskDetails(int year);
+
+	Result fetchOpenshiftTableDetails(int year);
+
+	Result fetchLandingTableDetails(int year);
+
 }

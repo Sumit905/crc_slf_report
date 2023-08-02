@@ -77,6 +77,7 @@ public class ExcelRestController {
 			taskIncident.put("SCTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("SCTASK".toUpperCase())).count());
 			taskIncident.put("PTASK",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PTASK".toUpperCase())).count());
 			taskIncident.put("RITM",slfReportDetails.stream().filter(rec -> rec.getStream().equals("RITM".toUpperCase())).count());
+			taskIncident.put("PRB",slfReportDetails.stream().filter(rec -> rec.getStream().equals("PRB".toUpperCase())).count());
 			responseModel.setTaskIncident(taskIncident);
 
 			List<ReportDetails> slfReportDetailsLanding = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(weeklyDate.getFromDate(),weeklyDate.getToDate(), "LANDING");
@@ -175,6 +176,27 @@ public class ExcelRestController {
 	@PostMapping(path="slfReport/header-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getHeaderDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchTableHeaderDetails(year);
+
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/task-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getTaskDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchTaskDetails(year);
+
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/openshift-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getOpenshiftDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchOpenshiftTableDetails(year);
+
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/landing-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getLandingDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchLandingTableDetails(year);
 
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
