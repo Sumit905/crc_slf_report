@@ -55,7 +55,8 @@ $(document)
                                 }
                             });
 
-                            $.ajax({
+
+                                                 $.ajax({
                                                             url : "../slfReport/task-details/"+selText,
                                                             type : 'Post',
                                                             success : function(result) {
@@ -78,7 +79,7 @@ $(document)
 
                                                             }
                                                         });
-                            $.ajax({
+                                                                         $.ajax({
                                                                                         url : "../slfReport/openshift-details/"+selText,
                                                                                         type : 'Post',
                                                                                         success : function(result) {
@@ -102,7 +103,7 @@ $(document)
                                                                                         }
                                                                                     });
 
-                            $.ajax({
+                                                                      $.ajax({
                                                                                         url : "../slfReport/landing-details/"+selText,
                                                                                         type : 'Post',
                                                                                         success : function(result) {
@@ -125,6 +126,56 @@ $(document)
 
                                                                                         }
                                                                                     });
+
+                        
+                        $.ajax({
+                            url : "../slfReport/batch/"+selText,
+                            type : 'Post',
+                            success : function(result) {
+                                    var data = eval(result);
+                                    console.log(data.columnDef);
+                                    // specify the data
+
+                                    // let the grid know which columns and what data to use
+                                    var gridOptions = {
+                                    groupIncludeFooter: true,
+                                    groupIncludeTotalFooter: true,
+                                      animateRows: true,
+                                      columnDefs: data.columnDef,
+                                      rowData: data.rowData
+                                    };
+
+                                    // setup the grid after the page has finished loading
+                                     var gridDiv = document.querySelector('#batchesIncident');
+                                      new agGrid.Grid(gridDiv, gridOptions);
+
+                            }
+                        });
+                        
+                        $.ajax({
+                            url : "../slfReport/idrs/"+selText,
+                            type : 'Post',
+                            success : function(result) {
+                                    var data = eval(result);
+                                    console.log(data.columnDef);
+                                    // specify the data
+
+                                    // let the grid know which columns and what data to use
+                                    var gridOptions = {
+                                    groupIncludeFooter: true,
+                                    groupIncludeTotalFooter: true,
+                                      animateRows: true,
+                                      columnDefs: data.columnDef,
+                                      rowData: data.rowData
+                                    };
+
+                                    // setup the grid after the page has finished loading
+                                     var gridDiv = document.querySelector('#idrsIncident');
+                                      new agGrid.Grid(gridDiv, gridOptions);
+
+                            }
+                        });
+
                    });
        });
 

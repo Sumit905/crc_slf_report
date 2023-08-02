@@ -29,6 +29,10 @@ public interface SlfReportService {
 	List<StackedColumnModel> getStackedColumnDetails(int year);
 
 	Result fetchTableHeaderDetails(int year);
+	
+	Result fetchTableBatchesDetails(int year);
+	
+	Result fetchTableIdrsDetails(int year);
 
 	Result fetchTaskDetails(int year);
 

@@ -201,6 +201,20 @@ public class ExcelRestController {
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
 	
+	@PostMapping(path="slfReport/batch/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getBatchDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchTableBatchesDetails(year);
+
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+	
+	@PostMapping(path="slfReport/idrs/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getIdrsDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchTableIdrsDetails(year);
+
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+	
 	public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
 	    return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
 	}
