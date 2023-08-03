@@ -1,9 +1,6 @@
 package com.slf.reports.controller;
 
 import com.slf.reports.entity.ReportDetails;
-import com.slf.reports.request.DateRequest;
-import com.slf.reports.request.WeeklyRequestParam;
-import com.slf.reports.response.HeaderDetails;
 import com.slf.reports.response.ResponseModel;
 import com.slf.reports.response.Result;
 import com.slf.reports.response.StackedColumnModel;
@@ -16,19 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -121,7 +112,7 @@ public class ExcelRestController {
 			Map<String,Long> dataClarificationIncident = new HashMap<>();
 			try {
 				slfReportService.fetchSheetNames().stream().forEach(sheetName -> {
-					dataClarificationIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
+					dataClarificationIncident.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream().toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Clarification".toUpperCase())).count());
 				});
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
@@ -133,7 +124,7 @@ public class ExcelRestController {
 			Map<String,Long> dataCorrectionIncident = new HashMap<>();
 			try {
 				slfReportService.fetchSheetNames().stream().forEach(sheetName -> {
-					dataCorrectionIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
+					dataCorrectionIncident.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream().toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
 				});
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
@@ -168,7 +159,7 @@ public class ExcelRestController {
 		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetails();
 		 Map<String,Long> listOfConsumer = new HashMap<String, Long>();
 		 slfReportService.fetchSheetNames().stream().forEach(sheetName ->
-			 listOfConsumer.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName)).count())
+			 listOfConsumer.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream())).count())
 		 );
 		 return new ResponseEntity<Map<String,Long>>(listOfConsumer, HttpStatus.OK);
 	}
@@ -214,26 +205,18 @@ public class ExcelRestController {
 
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
-	
-	public LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
-	    return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+
+	@PostMapping(path="slfReport/data/clarification/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getDataClarificationDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchDateClarificationDetails(year);
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
-	
-	public static boolean isValidFormat(String format, String value) {
-        Date date = null;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat(format);
-            date = sdf.parse(value);
-            if (!value.equals(sdf.format(date))) {
-                date = null;
-            }
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
-        return date != null;
-    }
-  
-	
+	@PostMapping(path="slfReport/data/correction/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getDataCorrectionDetails(@PathVariable int year) {
+		Result result = slfReportService.fetchDateCorrectionDetails(year);
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
 	public Long calculateIncidentNo( List<ReportDetails> sqlResult , String priority) {
 		
 		Long count = 0L;		

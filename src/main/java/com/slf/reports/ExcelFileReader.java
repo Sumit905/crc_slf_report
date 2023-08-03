@@ -18,12 +18,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 @Component
 public class ExcelFileReader {
 
     private MultipartFile excel;
 
-    private final static List<String> sheetNames = new ArrayList<>();
+    private final static List<String> sheetNames = new CopyOnWriteArrayList<>();
 
     public MultipartFile getExcel() {
         return excel;
