@@ -636,7 +636,9 @@ class SlfReportServiceImpl implements SlfReportService {
                 consumerMap.put("W" + i,
                                 String.valueOf(slfReportDetails.stream()
                                                                .filter(obj -> obj.getCategorization()
-                                                                                 .equals("Data Correction".toUpperCase()))
+                                                                                 .equals("Data Correction".toUpperCase()) || obj.getCategorization()
+                                                                       .equals("Data Repush".toUpperCase()) || obj.getCategorization()
+                                                                       .equals("Data Missing".toUpperCase()))
                                                                .count()));
             });
             rowDetails.add(consumerMap);

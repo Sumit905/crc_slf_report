@@ -10,11 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -37,6 +33,12 @@ public class ExcelRestController {
 		return new ResponseEntity<String>("Excel file imported successfully.", HttpStatus.OK);
 	}
 
+
+	@PutMapping(path="slfReport", produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displaySlfReportByDate(@RequestParam String fromDate, @RequestParam String toDate){
+		List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
+		return new ResponseEntity<Object>(slfReportDetails, HttpStatus.OK);
+	}
 
 	@PostMapping(path="slfReport/stacked-chart",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfStackedChart(@RequestParam int year){
@@ -124,7 +126,7 @@ public class ExcelRestController {
 			Map<String,Long> dataCorrectionIncident = new HashMap<>();
 			try {
 				slfReportService.fetchSheetNames().stream().forEach(sheetName -> {
-					dataCorrectionIncident.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream().toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase())).count());
+					dataCorrectionIncident.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream().toUpperCase())).filter(rec -> rec.getCategorization().equals("Data Correction".toUpperCase()) || rec.getCategorization().equals("Data Repush".toUpperCase()) || rec.getCategorization().equals("Data Missing".toUpperCase())).count());
 				});
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
