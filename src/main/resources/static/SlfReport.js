@@ -43,9 +43,7 @@ $(document)
                       for (let i of tablesList) {
                            let divId = document.querySelector('#'+i.tableId);
                            let incidentAgGrid = new agGrid.Grid(divId, {
-                                                                  groupIncludeFooter: true,
-                                                                  groupIncludeTotalFooter: true,
-                                                                   animateRows: true,
+                                                                    animateRows: true,
                                                                     columnDefs: [],
                                                                     rowData: []
                                                               });
@@ -54,6 +52,30 @@ $(document)
                             gridUrl:i.tableUrl
                           });
                       }
+                       var calcTotalCols = [];
+
+                        const totalRow = function(api,rowData) {
+                            let result = [{}];
+
+                            // initialize all total columns
+                            calcTotalCols.forEach(function (params){
+                                result[0][params.field] = 0
+                            });
+                           // calculate all total columns
+                            calcTotalCols.forEach(function (params){
+                               rowData.forEach(function (line) {
+                                    if(isNaN(line[params.field])){
+                                        result[0][params.field] = "<B>Total</B>";
+                                    } else {
+                                        result[0][params.field] += parseInt(line[params.field]);
+                                    }
+
+                                });
+                            });
+                            api.setPinnedBottomRowData(result);
+                        }
+
+
 
                    $(".dropdown-menu li a").click(function(){
                      var selText = $(this).text();
@@ -90,6 +112,8 @@ $(document)
                                           var data = eval(result);
                                           rec.gridOpt.gridOptions.api.setColumnDefs(data.columnDef);
                                           rec.gridOpt.gridOptions.api.setRowData(data.rowData);
+                                          calcTotalCols=data.columnDef;
+                                          totalRow(rec.gridOpt.gridOptions.api,data.rowData);
                                    }
                                });
                         }
