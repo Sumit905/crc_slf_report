@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -19,6 +21,7 @@ import com.slf.reports.entity.SheetNameEntity;
 import com.slf.reports.repository.SheetNamesRepository;
 import com.slf.reports.response.DataPointsModel;
 import com.slf.reports.response.HeaderDetails;
+import com.slf.reports.response.ResponseModel;
 import com.slf.reports.response.Result;
 import com.slf.reports.response.StackedColumnModel;
 import com.slf.reports.utils.FridayAndThursdayDates;
@@ -30,8 +33,36 @@ import com.slf.reports.repository.SlfReportRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.slf.reports.utils.ConstantUtil.BASELOADED_AGREEMENTS_FOR_RIX;
+import static com.slf.reports.utils.ConstantUtil.CRC_BATCHES;
+import static com.slf.reports.utils.ConstantUtil.CRITICAL;
+import static com.slf.reports.utils.ConstantUtil.CTASK;
+import static com.slf.reports.utils.ConstantUtil.DATA_CLARIFICATION;
+import static com.slf.reports.utils.ConstantUtil.DATA_CORRECTION;
+import static com.slf.reports.utils.ConstantUtil.DATA_MISSING;
+import static com.slf.reports.utils.ConstantUtil.DATA_REPUSH;
+import static com.slf.reports.utils.ConstantUtil.HIGH;
+import static com.slf.reports.utils.ConstantUtil.IDRS;
+import static com.slf.reports.utils.ConstantUtil.IPIX;
+import static com.slf.reports.utils.ConstantUtil.LANDING;
+import static com.slf.reports.utils.ConstantUtil.LEFT;
+import static com.slf.reports.utils.ConstantUtil.LOW;
+import static com.slf.reports.utils.ConstantUtil.MEDIUM;
+import static com.slf.reports.utils.ConstantUtil.PPE_JOB_FAILURES;
+import static com.slf.reports.utils.ConstantUtil.PRB;
+import static com.slf.reports.utils.ConstantUtil.PRB_FOR_CRC;
+import static com.slf.reports.utils.ConstantUtil.PRB_RAISED_BY_CRC;
+import static com.slf.reports.utils.ConstantUtil.PRIORITY;
+import static com.slf.reports.utils.ConstantUtil.PTASK;
+import static com.slf.reports.utils.ConstantUtil.RITM;
+import static com.slf.reports.utils.ConstantUtil.SCTASK;
+import static com.slf.reports.utils.ConstantUtil.STACKED_COLUMN;
+import static com.slf.reports.utils.ConstantUtil.URGENT;
+
 @Service
 class SlfReportServiceImpl implements SlfReportService {
+
+
 
     @Autowired
     private SlfReportRepository reportRepository;
@@ -44,12 +75,20 @@ class SlfReportServiceImpl implements SlfReportService {
 
     @Transactional
     public List<ReportDetails> saveReportDetails(MultipartFile excel) throws ParseException, IOException {
+
         excelFileReader.setExcel(excel);
-        excelFileReader.fetchSheetNames().stream().forEach(sheetName -> {
+
+        //Create and Save the Sheet Name in DB.
+        for(String sheetName : excelFileReader.fetchSheetNames()){
             SheetNameEntity sheetNameEntityObj = new SheetNameEntity();
             sheetNameEntityObj.setStream(sheetName);
-            sheetNamesRepository.save(sheetNameEntityObj);
-        });
+            // Not Save the duplicate Sheet Name In DB.
+            try{
+                sheetNamesRepository.save(sheetNameEntityObj);
+            }catch(Exception ex){
+                System.out.println(Arrays.toString(ex.getStackTrace()));
+            }
+        }
 
 
         List<ReportDetails> reportDetailsList = excelFileReader.fetchExcelData();
@@ -58,7 +97,12 @@ class SlfReportServiceImpl implements SlfReportService {
         reportDetailsList.stream()
                          .filter(rec -> rec.getCategorization() == null)
                          .forEach(rec -> rec.setCategorization("JOB FAILURE"));
+
         reportDetailsList.stream().filter(rec -> rec.getPriority() == null).forEach(rec -> rec.setPriority("NA"));
+
+        // Remove duplicate incident no. and not save the Incident record in DB.
+        reportDetailsList.removeIf(rec -> reportRepository.findByIncidentNo(rec.getIncidentNo())!= null);
+
         return convertIteratorToList(reportRepository.saveAll(reportDetailsList).iterator());
     }
 
@@ -67,7 +111,6 @@ class SlfReportServiceImpl implements SlfReportService {
     }
 
     public List<ReportDetails> fetchReportDetailsOnBasesOfDate(LocalDate fromDate, LocalDate toDate) {
-
         return reportRepository.findAllByDateBetween(fromDate, toDate);
     }
 
@@ -92,19 +135,19 @@ class SlfReportServiceImpl implements SlfReportService {
     public List<String> fetchSheetNamesWithTask() {
         List<String> sheetNames = fetchSheetNames().stream().map(SheetNameEntity::getStream).collect(Collectors.toList());
         List<String> removeSheetNames = new ArrayList<>();
-        removeSheetNames.add("IPIX");
-        removeSheetNames.add("LANDING");
-        removeSheetNames.add("IDRS");
-        removeSheetNames.add("CRC-BATCHES");
-        removeSheetNames.add("PRB FOR CRC");
-        removeSheetNames.add("PPE job failures");
-        removeSheetNames.add("PRB RAISED BY CRC");
-        removeSheetNames.add("SCTASK");
+        removeSheetNames.add(IPIX);
+        removeSheetNames.add(LANDING);
+        removeSheetNames.add(IDRS);
+        removeSheetNames.add(CRC_BATCHES);
+        removeSheetNames.add(PRB_FOR_CRC);
+        removeSheetNames.add(PPE_JOB_FAILURES);
+        removeSheetNames.add(PRB_RAISED_BY_CRC);
+        removeSheetNames.add(SCTASK);
         removeSheetNames.add("CH & CTASK");
-        removeSheetNames.add("PTASK");
-        removeSheetNames.add("Baseloaded Agreements for RIX");
-        removeSheetNames.add("RITM");
-        sheetNames.removeIf(rec -> removeSheetNames.contains(rec));
+        removeSheetNames.add(PTASK);
+        removeSheetNames.add(BASELOADED_AGREEMENTS_FOR_RIX);
+        removeSheetNames.add(RITM);
+        sheetNames.removeIf(removeSheetNames::contains);
         return sheetNames;
     }
 
@@ -113,30 +156,30 @@ class SlfReportServiceImpl implements SlfReportService {
 
         List<StackedColumnModel> data = new ArrayList<>();
         StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
-        criticalStackedColumnModel.setType("stackedColumn");
-        criticalStackedColumnModel.setName("Critical");
+        criticalStackedColumnModel.setType(STACKED_COLUMN);
+        criticalStackedColumnModel.setName(CRITICAL);
         criticalStackedColumnModel.setShowInLegend("true");
         criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
         StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
-        urgentStackedColumnModel.setType("stackedColumn");
-        urgentStackedColumnModel.setName("Urgent");
+        urgentStackedColumnModel.setType(STACKED_COLUMN);
+        urgentStackedColumnModel.setName(URGENT);
         urgentStackedColumnModel.setShowInLegend("true");
         urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
         StackedColumnModel highStackedColumnModel = new StackedColumnModel();
-        highStackedColumnModel.setType("stackedColumn");
-        highStackedColumnModel.setName("High");
+        highStackedColumnModel.setType(STACKED_COLUMN);
+        highStackedColumnModel.setName(HIGH);
         highStackedColumnModel.setShowInLegend("true");
         highStackedColumnModel.setyValueFormatString("## High Incidents");
 
         StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
-        mediumStackedColumnModel.setType("stackedColumn");
-        mediumStackedColumnModel.setName("Medium");
+        mediumStackedColumnModel.setType(STACKED_COLUMN);
+        mediumStackedColumnModel.setName(MEDIUM);
         mediumStackedColumnModel.setShowInLegend("true");
         mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
 
         StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
-        lowStackedColumnModel.setType("stackedColumn");
-        lowStackedColumnModel.setName("Low");
+        lowStackedColumnModel.setType(STACKED_COLUMN);
+        lowStackedColumnModel.setName(LOW);
         lowStackedColumnModel.setShowInLegend("true");
         lowStackedColumnModel.setyValueFormatString("## Low Incidents");
 
@@ -146,35 +189,35 @@ class SlfReportServiceImpl implements SlfReportService {
         List<DataPointsModel> mediumDataPoint = new ArrayList<>();
         List<DataPointsModel> lowDataPoint = new ArrayList<>();
 
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             DataPointsModel dataPointsModel = new DataPointsModel();
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             dataPointsModel.setY(slfReportDetails.stream()
-                                                 .filter(obj -> obj.getPriority().equals("Critical".toUpperCase()))
+                                                 .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
                                                  .count());
             dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
             criticalDataPoint.add(dataPointsModel);
             dataPointsModel = new DataPointsModel();
             dataPointsModel.setY(slfReportDetails.stream()
-                                                 .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()))
+                                                 .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
                                                  .count());
             dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
             urgentDataPoint.add(dataPointsModel);
             dataPointsModel = new DataPointsModel();
             dataPointsModel.setY(slfReportDetails.stream()
-                                                 .filter(obj -> obj.getPriority().equals("High".toUpperCase()))
+                                                 .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()))
                                                  .count());
             dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
             highDataPoint.add(dataPointsModel);
             dataPointsModel = new DataPointsModel();
             dataPointsModel.setY(slfReportDetails.stream()
-                                                 .filter(obj -> obj.getPriority().equals("Medium".toUpperCase()))
+                                                 .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
                                                  .count());
             dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
             mediumDataPoint.add(dataPointsModel);
             dataPointsModel = new DataPointsModel();
             dataPointsModel.setY(slfReportDetails.stream()
-                                                 .filter(obj -> obj.getPriority().equals("Low".toUpperCase()))
+                                                 .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()))
                                                  .count());
             dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
             lowDataPoint.add(dataPointsModel);
@@ -196,8 +239,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Priority");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -208,17 +251,13 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> highMap = new HashMap<>();
         Map<String, String> mediumMap = new HashMap<>();
         Map<String, String> lowMap = new HashMap<>();
+        criticalMap.put(PRIORITY, CRITICAL);
+        urgentMap.put(PRIORITY, URGENT);
+        highMap.put(PRIORITY, HIGH);
+        mediumMap.put(PRIORITY, MEDIUM);
+        lowMap.put(PRIORITY, LOW);
 
-        Map<String, String> ctaskMap = new HashMap<>();
-
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        criticalMap.put("priority", "Critical");
-        urgentMap.put("priority", "Urgent");
-        highMap.put("priority", "High");
-        mediumMap.put("priority", "Medium");
-        lowMap.put("priority", "Low");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
@@ -226,21 +265,21 @@ class SlfReportServiceImpl implements SlfReportService {
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
-                                            .filter(obj -> obj.getPriority().equals("Critical".toUpperCase()))
+                                            .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
                                             .count() + "");
             urgentMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
                                           .count() + "");
             highMap.put("W" + i,
-                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count()
+                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals(HIGH.toUpperCase())).count()
                         + "");
             mediumMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Medium".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
                                           .count() + "");
             lowMap.put("W" + i,
-                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count()
+                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals(LOW.toUpperCase())).count()
                        + "");
         });
         rowDetails.add(criticalMap);
@@ -258,8 +297,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Tasks");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -270,15 +309,13 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> ptaskMap = new HashMap<>();
         Map<String, String> ritmMap = new HashMap<>();
         Map<String, String> prbMap = new HashMap<>();
+        ctaskMap.put(PRIORITY, CTASK);
+        sctaskMap.put(PRIORITY, SCTASK);
+        ptaskMap.put(PRIORITY, PTASK);
+        ritmMap.put(PRIORITY, RITM);
+        prbMap.put(PRIORITY, PRB);
 
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        ctaskMap.put("priority", "CTASK");
-        sctaskMap.put("priority", "SCTASK");
-        ptaskMap.put("priority", "PTASK");
-        ritmMap.put("priority", "RITM");
-        prbMap.put("priority", "PRB");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
@@ -290,16 +327,16 @@ class SlfReportServiceImpl implements SlfReportService {
                                          .count() + "");
             sctaskMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getStream().equals("SCTASK".toUpperCase()))
+                                          .filter(obj -> obj.getStream().equals(SCTASK.toUpperCase()))
                                           .count() + "");
             ptaskMap.put("W" + i,
-                         slfReportDetails.stream().filter(obj -> obj.getStream().equals("PTASK".toUpperCase())).count()
+                         slfReportDetails.stream().filter(obj -> obj.getStream().equals(PTASK.toUpperCase())).count()
                          + "");
             ritmMap.put("W" + i,
-                        slfReportDetails.stream().filter(obj -> obj.getStream().equals("RITM".toUpperCase())).count()
+                        slfReportDetails.stream().filter(obj -> obj.getStream().equals(RITM.toUpperCase())).count()
                         + "");
             prbMap.put("W" + i,
-                       slfReportDetails.stream().filter(obj -> obj.getStream().equals("PRB".toUpperCase())).count()
+                       slfReportDetails.stream().filter(obj -> obj.getStream().equals(PRB.toUpperCase())).count()
                        + "");
         });
         rowDetails.add(ctaskMap);
@@ -317,8 +354,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Priority");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -329,15 +366,13 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> highMap = new HashMap<>();
         Map<String, String> mediumMap = new HashMap<>();
         Map<String, String> lowMap = new HashMap<>();
+        criticalMap.put(PRIORITY, CRITICAL);
+        urgentMap.put(PRIORITY, URGENT);
+        highMap.put(PRIORITY, HIGH);
+        mediumMap.put(PRIORITY, MEDIUM);
+        lowMap.put(PRIORITY, LOW);
 
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        criticalMap.put("priority", "Critical");
-        urgentMap.put("priority", "Urgent");
-        highMap.put("priority", "High");
-        mediumMap.put("priority", "Medium");
-        lowMap.put("priority", "Low");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
@@ -345,28 +380,28 @@ class SlfReportServiceImpl implements SlfReportService {
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
-                                            .filter(obj -> obj.getPriority().equals("Critical".toUpperCase())
-                                                           && obj.getStream().equals("IPIX".toUpperCase()))
+                                            .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase())
+                                                           && obj.getStream().equals(IPIX.toUpperCase()))
                                             .count() + "");
             urgentMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase())
-                                                         && obj.getStream().equals("IPIX".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase())
+                                                         && obj.getStream().equals(IPIX.toUpperCase()))
                                           .count() + "");
             highMap.put("W" + i,
                         slfReportDetails.stream()
-                                        .filter(obj -> obj.getPriority().equals("High".toUpperCase()) && obj.getStream()
-                                                                                                            .equals("IPIX".toUpperCase()))
+                                        .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()) && obj.getStream()
+                                                                                                            .equals(IPIX.toUpperCase()))
                                         .count() + "");
             mediumMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Medium".toUpperCase())
-                                                         && obj.getStream().equals("IPIX".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase())
+                                                         && obj.getStream().equals(IPIX.toUpperCase()))
                                           .count() + "");
             lowMap.put("W" + i,
                        slfReportDetails.stream()
-                                       .filter(obj -> obj.getPriority().equals("Low".toUpperCase()) && obj.getStream()
-                                                                                                          .equals("IPIX".toUpperCase()))
+                                       .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()) && obj.getStream()
+                                                                                                          .equals(IPIX.toUpperCase()))
                                        .count() + "");
         });
         rowDetails.add(criticalMap);
@@ -384,8 +419,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Priority");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -396,15 +431,13 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> highMap = new HashMap<>();
         Map<String, String> mediumMap = new HashMap<>();
         Map<String, String> lowMap = new HashMap<>();
+        criticalMap.put(PRIORITY, CRITICAL);
+        urgentMap.put(PRIORITY, URGENT);
+        highMap.put(PRIORITY, HIGH);
+        mediumMap.put(PRIORITY, MEDIUM);
+        lowMap.put(PRIORITY, LOW);
 
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        criticalMap.put("priority", "Critical");
-        urgentMap.put("priority", "Urgent");
-        highMap.put("priority", "High");
-        mediumMap.put("priority", "Medium");
-        lowMap.put("priority", "Low");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
@@ -412,28 +445,28 @@ class SlfReportServiceImpl implements SlfReportService {
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
-                                            .filter(obj -> obj.getPriority().equals("Critical".toUpperCase())
-                                                           && obj.getStream().equals("LANDING".toUpperCase()))
+                                            .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase())
+                                                           && obj.getStream().equals(LANDING.toUpperCase()))
                                             .count() + "");
             urgentMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase())
-                                                         && obj.getStream().equals("LANDING".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase())
+                                                         && obj.getStream().equals(LANDING.toUpperCase()))
                                           .count() + "");
             highMap.put("W" + i,
                         slfReportDetails.stream()
-                                        .filter(obj -> obj.getPriority().equals("High".toUpperCase()) && obj.getStream()
-                                                                                                            .equals("LANDING".toUpperCase()))
+                                        .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()) && obj.getStream()
+                                                                                                            .equals(LANDING.toUpperCase()))
                                         .count() + "");
             mediumMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Medium".toUpperCase())
-                                                         && obj.getStream().equals("LANDING".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase())
+                                                         && obj.getStream().equals(LANDING.toUpperCase()))
                                           .count() + "");
             lowMap.put("W" + i,
                        slfReportDetails.stream()
-                                       .filter(obj -> obj.getPriority().equals("Low".toUpperCase()) && obj.getStream()
-                                                                                                          .equals("LANDING".toUpperCase()))
+                                       .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()) && obj.getStream()
+                                                                                                          .equals(LANDING.toUpperCase()))
                                        .count() + "");
         });
         rowDetails.add(criticalMap);
@@ -452,8 +485,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Priority");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -464,38 +497,36 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> highMap = new HashMap<>();
         Map<String, String> mediumMap = new HashMap<>();
         Map<String, String> lowMap = new HashMap<>();
+        criticalMap.put(PRIORITY, CRITICAL);
+        urgentMap.put(PRIORITY, URGENT);
+        highMap.put(PRIORITY, HIGH);
+        mediumMap.put(PRIORITY, MEDIUM);
+        lowMap.put(PRIORITY, LOW);
 
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        criticalMap.put("priority", "Critical");
-        urgentMap.put("priority", "Urgent");
-        highMap.put("priority", "High");
-        mediumMap.put("priority", "Medium");
-        lowMap.put("priority", "Low");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
             headerDetails.add(details);
             List<ReportDetails> slfReportDetails =
-                    fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), "CRC-BATCHES");
+                    fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), CRC_BATCHES);
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
-                                            .filter(obj -> obj.getPriority().equals("Critical".toUpperCase()))
+                                            .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
                                             .count() + "");
             urgentMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
                                           .count() + "");
             highMap.put("W" + i,
-                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count()
+                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals(HIGH.toUpperCase())).count()
                         + "");
             mediumMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Medium".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
                                           .count() + "");
             lowMap.put("W" + i,
-                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count()
+                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals(LOW.toUpperCase())).count()
                        + "");
         });
         rowDetails.add(criticalMap);
@@ -515,8 +546,8 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Priority");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         AtomicInteger i = new AtomicInteger();
@@ -527,38 +558,36 @@ class SlfReportServiceImpl implements SlfReportService {
         Map<String, String> highMap = new HashMap<>();
         Map<String, String> mediumMap = new HashMap<>();
         Map<String, String> lowMap = new HashMap<>();
+        criticalMap.put(PRIORITY, CRITICAL);
+        urgentMap.put(PRIORITY, URGENT);
+        highMap.put(PRIORITY, HIGH);
+        mediumMap.put(PRIORITY, MEDIUM);
+        lowMap.put(PRIORITY, LOW);
 
-        List<Map<String, String>> taskIncidentList = new ArrayList<>();
-        criticalMap.put("priority", "Critical");
-        urgentMap.put("priority", "Urgent");
-        highMap.put("priority", "High");
-        mediumMap.put("priority", "Medium");
-        lowMap.put("priority", "Low");
-
-        FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
             HeaderDetails details = new HeaderDetails();
             details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
             details.setField("W" + (i.incrementAndGet()));
             headerDetails.add(details);
             List<ReportDetails> slfReportDetails =
-                    fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), "IDRS");
+                    fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), IDRS);
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
-                                            .filter(obj -> obj.getPriority().equals("Critical".toUpperCase()))
+                                            .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
                                             .count() + "");
             urgentMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Urgent".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
                                           .count() + "");
             highMap.put("W" + i,
-                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals("High".toUpperCase())).count()
+                        slfReportDetails.stream().filter(obj -> obj.getPriority().equals(HIGH.toUpperCase())).count()
                         + "");
             mediumMap.put("W" + i,
                           slfReportDetails.stream()
-                                          .filter(obj -> obj.getPriority().equals("Medium".toUpperCase()))
+                                          .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
                                           .count() + "");
             lowMap.put("W" + i,
-                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals("Low".toUpperCase())).count()
+                       slfReportDetails.stream().filter(obj -> obj.getPriority().equals(LOW.toUpperCase())).count()
                        + "");
         });
         rowDetails.add(criticalMap);
@@ -578,17 +607,17 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Consumer");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
-        sheetNames.stream().forEach(sheetName -> {
+        sheetNames.forEach(sheetName -> {
             Map<String, String> consumerMap = new HashMap<>();
-            consumerMap.put("priority", sheetName);
+            consumerMap.put(PRIORITY, sheetName);
             AtomicInteger i = new AtomicInteger();
-            FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+            FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
                 HeaderDetails details = new HeaderDetails();
                 details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
                 details.setField("W" + (i.incrementAndGet()));
@@ -599,7 +628,7 @@ class SlfReportServiceImpl implements SlfReportService {
                 consumerMap.put("W" + i,
                                 String.valueOf(slfReportDetails.stream()
                                                                .filter(obj -> obj.getCategorization()
-                                                                                 .equals("Data Clarification".toUpperCase()))
+                                                                                 .equals(DATA_CLARIFICATION))
                                                                .count()));
             });
             rowDetails.add(consumerMap);
@@ -615,17 +644,17 @@ class SlfReportServiceImpl implements SlfReportService {
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
         headerDetail.setHeaderName("Consumer");
-        headerDetail.setField("priority");
-        headerDetail.setPinned("left");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
 
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
-        sheetNames.stream().forEach(sheetName -> {
+        sheetNames.forEach(sheetName -> {
             Map<String, String> consumerMap = new HashMap<>();
-            consumerMap.put("priority", sheetName);
+            consumerMap.put(PRIORITY, sheetName);
             AtomicInteger i = new AtomicInteger();
-            FridayAndThursdayDates.getWeeklyDays(year).stream().forEach(rec -> {
+            FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
                 HeaderDetails details = new HeaderDetails();
                 details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
                 details.setField("W" + (i.incrementAndGet()));
@@ -636,9 +665,9 @@ class SlfReportServiceImpl implements SlfReportService {
                 consumerMap.put("W" + i,
                                 String.valueOf(slfReportDetails.stream()
                                                                .filter(obj -> obj.getCategorization()
-                                                                                 .equals("Data Correction".toUpperCase()) || obj.getCategorization()
-                                                                       .equals("Data Repush".toUpperCase()) || obj.getCategorization()
-                                                                       .equals("Data Missing".toUpperCase()))
+                                                                                 .equals(DATA_CORRECTION) || obj.getCategorization()
+                                                                       .equals(DATA_REPUSH) || obj.getCategorization()
+                                                                       .equals(DATA_MISSING))
                                                                .count()));
             });
             rowDetails.add(consumerMap);
@@ -648,5 +677,94 @@ class SlfReportServiceImpl implements SlfReportService {
         result.setColumnDef(headerDetails);
         result.setRowData(rowDetails);
         return result;
+    }
+
+    public Map<String, ResponseModel> fetchResponseModels(int year){
+        Map<String,ResponseModel>  responseModelMap = new LinkedHashMap<>();
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(weeklyDate -> {
+
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(weeklyDate.getFromDate(), weeklyDate.getToDate());
+            ResponseModel responseModel = new ResponseModel();
+
+            Map<String,Long> incident = new HashMap<>();
+            incident.put(CRITICAL,slfReportDetails.stream().filter(rec -> rec.getPriority().equals(CRITICAL.toUpperCase())).count());
+            incident.put(URGENT,slfReportDetails.stream().filter(rec -> rec.getPriority().equals(URGENT.toUpperCase())).count());
+            incident.put(HIGH,slfReportDetails.stream().filter(rec -> rec.getPriority().equals(HIGH.toUpperCase())).count());
+            incident.put(MEDIUM,slfReportDetails.stream().filter(rec -> rec.getPriority().equals(MEDIUM.toUpperCase())).count());
+            incident.put(LOW,slfReportDetails.stream().filter(rec -> rec.getPriority().equals(LOW.toUpperCase())).count());
+            responseModel.setTotalNoOfIncident(incident);
+
+
+            Map<String,Long> taskIncident = new HashMap<>();
+            taskIncident.put(CTASK,slfReportDetails.stream().filter(rec -> rec.getStream().equals("CH & CTASK")).count());
+            taskIncident.put(SCTASK,slfReportDetails.stream().filter(rec -> rec.getStream().equals(SCTASK)).count());
+            taskIncident.put(PTASK,slfReportDetails.stream().filter(rec -> rec.getStream().equals(PTASK)).count());
+            taskIncident.put(RITM,slfReportDetails.stream().filter(rec -> rec.getStream().equals(RITM)).count());
+            taskIncident.put(PRB,slfReportDetails.stream().filter(rec -> rec.getStream().equals(PRB)).count());
+            responseModel.setTaskIncident(taskIncident);
+
+            List<ReportDetails> slfReportDetailsLanding = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyDate.getFromDate(),weeklyDate.getToDate(), LANDING);
+            Map<String,Long> landingIncident = new HashMap<>();
+            landingIncident.put(CRITICAL,slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals(CRITICAL.toUpperCase())).count());
+            landingIncident.put(URGENT,slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals(URGENT.toUpperCase())).count());
+            landingIncident.put(HIGH,slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals(HIGH.toUpperCase())).count());
+            landingIncident.put(MEDIUM,slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals(MEDIUM.toUpperCase())).count());
+            landingIncident.put(LOW,slfReportDetailsLanding.stream().filter(rec -> rec.getPriority().equals(LOW.toUpperCase())).count());
+            responseModel.setLandingIncident(landingIncident);
+
+            List<ReportDetails> slfReportDetailsIdrs = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyDate.getFromDate(),weeklyDate.getToDate(), IDRS);
+            Map<String,Long> idrsIncident = new HashMap<>();
+            slfReportDetailsIdrs.stream().filter(rec -> rec.getPriority().equalsIgnoreCase(HIGH.toUpperCase())).forEach(
+                    System.out::println);
+
+            idrsIncident.put(CRITICAL,calculateIncidentNo(slfReportDetailsIdrs,CRITICAL.toUpperCase()));
+            idrsIncident.put(URGENT,calculateIncidentNo(slfReportDetailsIdrs,URGENT.toUpperCase()));
+            idrsIncident.put(HIGH,calculateIncidentNo(slfReportDetailsIdrs,HIGH.toUpperCase()));
+            idrsIncident.put(MEDIUM,calculateIncidentNo(slfReportDetailsIdrs,MEDIUM.toUpperCase()));
+            idrsIncident.put(LOW,calculateIncidentNo(slfReportDetailsIdrs,LOW.toUpperCase()));
+            responseModel.setIdsIncident(idrsIncident);
+
+            List<ReportDetails> slfReportDetailsBatchs = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyDate.getFromDate(),weeklyDate.getToDate(), CRC_BATCHES);
+            Map<String,Long> batchesIncident = new HashMap<>();
+            batchesIncident.put(CRITICAL,calculateIncidentNo(slfReportDetailsBatchs,CRITICAL.toUpperCase()));
+            batchesIncident.put(URGENT,calculateIncidentNo(slfReportDetailsBatchs,URGENT.toUpperCase()));
+            batchesIncident.put(HIGH,calculateIncidentNo(slfReportDetailsBatchs,HIGH.toUpperCase()));
+            batchesIncident.put(MEDIUM,calculateIncidentNo(slfReportDetailsBatchs,MEDIUM.toUpperCase()));
+            batchesIncident.put(LOW,calculateIncidentNo(slfReportDetailsBatchs,LOW.toUpperCase()));
+            responseModel.setBatchesIncident(batchesIncident);
+
+            List<ReportDetails> slfReportDetailsOpen = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyDate.getFromDate(),weeklyDate.getToDate(), IPIX);
+            Map<String,Long> openShiftIncident = new HashMap<>();
+            openShiftIncident.put(CRITICAL,calculateIncidentNo(slfReportDetailsOpen,CRITICAL.toUpperCase()));
+            openShiftIncident.put(URGENT,calculateIncidentNo(slfReportDetailsOpen,URGENT.toUpperCase()));
+            openShiftIncident.put(HIGH,calculateIncidentNo(slfReportDetailsOpen,HIGH.toUpperCase()));
+            openShiftIncident.put(MEDIUM,calculateIncidentNo(slfReportDetailsOpen,MEDIUM.toUpperCase()));
+            openShiftIncident.put(LOW,calculateIncidentNo(slfReportDetailsOpen,LOW.toUpperCase()));
+            responseModel.setOpenShiftIncident(openShiftIncident);
+
+            Map<String,Long> dataClarificationIncident = new HashMap<>();
+            fetchSheetNamesWithTask().forEach(sheetName -> dataClarificationIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals(DATA_CLARIFICATION)).count()));
+            responseModel.setDataClarificationIncident(dataClarificationIncident);
+
+            Map<String,Long> dataCorrectionIncident = new HashMap<>();
+            fetchSheetNamesWithTask().forEach(sheetName ->
+                                                                       dataCorrectionIncident.put(sheetName,slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.toUpperCase())).filter(rec -> rec.getCategorization().equals(DATA_CORRECTION) || rec.getCategorization().equals(DATA_REPUSH) || rec.getCategorization().equals(DATA_MISSING.toUpperCase())).count()));
+            responseModel.setDataCorrectionIncident(dataCorrectionIncident);
+            responseModelMap.put(weeklyDate.getFromDate()+" - "+weeklyDate.getToDate(),responseModel);
+        });
+
+        return responseModelMap;
+    }
+
+    public Long calculateIncidentNo( List<ReportDetails> sqlResult , String priority) {
+
+        Long count = 0L;
+
+        for(ReportDetails reportDetail : sqlResult) {
+            if(priority.compareTo(reportDetail.getPriority().trim()) == 0) {
+                count++;
+            }
+        }
+        return count;
     }
 }

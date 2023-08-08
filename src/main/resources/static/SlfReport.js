@@ -39,23 +39,6 @@ $(document)
                         tableId: 'dataCorrectionIncident',
                         tableUrl: '../slfReport/data/correction/'
                     }]
-//                    const reportDetailsObservable = obj => {
-//                        return new Observable(subscriber => {
-//                            for (let i of obj) {
-//                                 let divId = document.querySelector('#'+i.tableId);
-//                                 let incidentAgGrid = new agGrid.Grid(divId, {
-//                                                                        groupIncludeFooter: true,
-//                                                                        groupIncludeTotalFooter: true,
-//                                                                         animateRows: true,
-//                                                                          columnDefs: [],
-//                                                                          rowData: []
-//                                                                    });
-//                                subscriber.next(incidentAgGrid,i.tableUrl);
-//                            }
-//                        });
-//                    };
-//                     const observable = reportDetailsObservable(tablesList);
-
                       const gridOptions = [];
                       for (let i of tablesList) {
                            let divId = document.querySelector('#'+i.tableId);
@@ -111,18 +94,6 @@ $(document)
                                });
                         }
 
-//                    observable.subscribe({
-//                       next(gridId, url) {
-//                          $.ajax({
-//                                   url : url+selText,
-//                                   type : 'Post',
-//                                   success : function(result) {
-//                                          var data = eval(result);
-//                                          gridId.gridOptions.api.setColumnDefs(data.columnDef);
-//                                          gridId.gridOptions.api.setRowData(data.rowData);
-//                                   }
-//                               });
-//                       }
-//                     });
+
                    });
        });

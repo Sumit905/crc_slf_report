@@ -14,18 +14,23 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.slf.reports.utils.ConstantUtil.CATEGORIZATION;
+import static com.slf.reports.utils.ConstantUtil.DATA_CLARIFICATION;
+import static com.slf.reports.utils.ConstantUtil.DATA_CORRECTION;
+import static com.slf.reports.utils.ConstantUtil.DATA_MISSING;
+import static com.slf.reports.utils.ConstantUtil.DATE;
 
 @Component
 public class ExcelFileReader {
 
     private MultipartFile excel;
 
-    private final static List<String> sheetNames = new CopyOnWriteArrayList<>();
 
     public MultipartFile getExcel() {
         return excel;
@@ -35,13 +40,18 @@ public class ExcelFileReader {
         this.excel = excel;
     }
 
+    private static final String  SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String  PRIORITY = "PRIORITY";
+    private static final String  INC_NO = "INC_NO";
 
 
-    XSSFWorkbook fetchWorkBookReader() throws ParseException, IOException {
+
+    XSSFWorkbook fetchWorkBookReader() throws IOException {
         return new XSSFWorkbook(getExcel().getInputStream());
     }
 
     public List<String> fetchSheetNames() throws ParseException, IOException {
+        List<String> sheetNames = new ArrayList<>();
         XSSFWorkbook workbook = fetchWorkBookReader();
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             sheetNames.add(workbook.getSheetName(i));
@@ -57,7 +67,7 @@ public class ExcelFileReader {
 
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             XSSFSheet sheet = workbook.getSheetAt(i);
-            Map<Integer, String> headerDetails = new HashMap<Integer, String>();
+            Map<Integer, String> headerDetails = new HashMap<>();
             int noOfColumns = sheet.getRow(0).getPhysicalNumberOfCells();
             for (int j = 0; j <= sheet.getPhysicalNumberOfRows(); j++) {
                 if (j == 0 && sheet.getRow(j) != null) {
@@ -75,25 +85,25 @@ public class ExcelFileReader {
 
                     for (int z = 0; z < headerDetails.size(); z++) {
                         switch (headerDetails.get(z).trim().toUpperCase()) {
-                            case "CATEGORIZATION":
+                            case CATEGORIZATION:
                                 if (sheet.getRow(j).getCell(z) != null) {
                                     String value = sheet.getRow(j).getCell(z).getStringCellValue();
-                                    if(value.trim().toLowerCase().contains("data clarification")) {
-                                        value="Data Clarification".toUpperCase();
-                                    } else if(value.trim().toLowerCase().contains("data missing") || value.trim().toLowerCase().contains("data correction")) {
-                                        value="Data Correction".toUpperCase();
+                                    if(value.trim().toUpperCase().contains(DATA_CLARIFICATION)) {
+                                        value = DATA_CLARIFICATION;
+                                    } else if(value.trim().toUpperCase().contains(DATA_MISSING) || value.trim().toUpperCase().contains(DATA_CORRECTION)) {
+                                        value= DATA_CORRECTION;
                                     } else {
                                         value = value.toUpperCase();
                                     }
                                     details.setCategorization(value);
                                 } else {
-                                    details.setCategorization("Data Clarification".toUpperCase());
+                                    details.setCategorization(DATA_CLARIFICATION);
                                 }
                                 break;
-                            case "DATE":
+                            case DATE:
                                 if (sheet.getRow(j).getCell(z) != null) {
-                                    SimpleDateFormat targetDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                    SimpleDateFormat targetDateFormat = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT);
                                     if (sheet.getRow(j).getCell(z).getCellType() == CellType.NUMERIC
                                         && DateUtil.isCellDateFormatted(sheet.getRow(j).getCell(z))) {
                                         Date date = sheet.getRow(j).getCell(z).getDateCellValue();
@@ -113,7 +123,7 @@ public class ExcelFileReader {
                                     }
                                 }
                                 break;
-                            case "PRIORITY":
+                            case PRIORITY:
                                 if (sheet.getRow(j).getCell(z) != null) {
                                     details.setPriority(sheet.getRow(j).getCell(z).getStringCellValue().trim().toUpperCase());
                                 } else {
@@ -121,7 +131,7 @@ public class ExcelFileReader {
                                 }
 
                                 break;
-                            case "INC_NO":
+                            case INC_NO:
                                 if (sheet.getRow(j).getCell(z) != null)
                                     details.setIncidentNo(sheet.getRow(j).getCell(z).getStringCellValue().trim());
                                 break;
@@ -134,10 +144,7 @@ public class ExcelFileReader {
         }
 
         }catch(IOException ioException){
-            System.out.println(ioException.getStackTrace());
-        }
-        catch (ParseException parseException){
-            System.out.println(parseException.getStackTrace());
+            System.out.println(Arrays.toString(ioException.getStackTrace()));
         }
         return reportDetailsList;
     }

@@ -1,15 +1,12 @@
 package com.slf.reports.utils;
 
-import com.slf.reports.request.DateRequest;
 import com.slf.reports.request.WeeklyRequestParam;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FridayAndThursdayDates {
 
