@@ -65,7 +65,7 @@ $(document)
                             calcTotalCols.forEach(function (params){
                                rowData.forEach(function (line) {
                                     if(isNaN(line[params.field])){
-                                        result[0][params.field] = "<B>Total</B>";
+                                        result[0][params.field] = "Total";
                                     } else {
                                         result[0][params.field] += parseInt(line[params.field]);
                                     }
