@@ -90,7 +90,7 @@ public class ExcelFileReader {
                                     String value = sheet.getRow(j).getCell(z).getStringCellValue();
                                     if(value.trim().toUpperCase().contains(DATA_CLARIFICATION)) {
                                         value = DATA_CLARIFICATION;
-                                    } else if(value.trim().toUpperCase().contains(DATA_MISSING) || value.trim().toUpperCase().contains(DATA_CORRECTION)) {
+                                    } else if(value.trim().toUpperCase().contains(DATA_CORRECTION)) {
                                         value= DATA_CORRECTION;
                                     } else {
                                         value = value.toUpperCase();

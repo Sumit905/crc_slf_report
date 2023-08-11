@@ -19,6 +19,7 @@ import java.util.stream.StreamSupport;
 import com.slf.reports.ExcelFileReader;
 import com.slf.reports.entity.SheetNameEntity;
 import com.slf.reports.repository.SheetNamesRepository;
+import com.slf.reports.request.WeeklyRequestParam;
 import com.slf.reports.response.DataPointsModel;
 import com.slf.reports.response.HeaderDetails;
 import com.slf.reports.response.ResponseModel;
@@ -613,19 +614,23 @@ class SlfReportServiceImpl implements SlfReportService {
 
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
+        List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
+        AtomicInteger di = new AtomicInteger();
+        weeklyRequestParams.forEach(rec -> {
+            HeaderDetails details = new HeaderDetails();
+            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
+            details.setField("W" + (di.incrementAndGet()));
+            headerDetails.add(details);
+        });
+
         sheetNames.forEach(sheetName -> {
             Map<String, String> consumerMap = new HashMap<>();
             consumerMap.put(PRIORITY, sheetName);
             AtomicInteger i = new AtomicInteger();
-            FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-                HeaderDetails details = new HeaderDetails();
-                details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-                details.setField("W" + (i.incrementAndGet()));
-                headerDetails.add(details);
-
+            weeklyRequestParams.forEach(rec -> {
                 List<ReportDetails> slfReportDetails =
                         fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), sheetName);
-                consumerMap.put("W" + i,
+                consumerMap.put("W" + i.incrementAndGet(),
                                 String.valueOf(slfReportDetails.stream()
                                                                .filter(obj -> obj.getCategorization()
                                                                                  .equals(DATA_CLARIFICATION))
@@ -647,31 +652,34 @@ class SlfReportServiceImpl implements SlfReportService {
         headerDetail.setField(PRIORITY);
         headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
-
+        List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
-        sheetNames.forEach(sheetName -> {
+        AtomicInteger di = new AtomicInteger();
+        weeklyRequestParams.forEach(rec -> {
+            HeaderDetails details = new HeaderDetails();
+            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
+            details.setField("W" + (di.incrementAndGet()));
+            headerDetails.add(details);
+        });
+
+        for(String sheetName : sheetNames){
             Map<String, String> consumerMap = new HashMap<>();
             consumerMap.put(PRIORITY, sheetName);
             AtomicInteger i = new AtomicInteger();
-            FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-                HeaderDetails details = new HeaderDetails();
-                details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-                details.setField("W" + (i.incrementAndGet()));
-                headerDetails.add(details);
-
+            weeklyRequestParams.forEach(rec -> {
                 List<ReportDetails> slfReportDetails =
                         fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), sheetName);
-                consumerMap.put("W" + i,
+                consumerMap.put("W" + i.incrementAndGet(),
                                 String.valueOf(slfReportDetails.stream()
                                                                .filter(obj -> obj.getCategorization()
                                                                                  .equals(DATA_CORRECTION) || obj.getCategorization()
-                                                                       .equals(DATA_REPUSH) || obj.getCategorization()
-                                                                       .equals(DATA_MISSING))
+                                                                                                                .equals(DATA_REPUSH) || obj.getCategorization()
+                                                                                                                                           .equals(DATA_MISSING))
                                                                .count()));
             });
             rowDetails.add(consumerMap);
-        });
+        }
 
         Result result = new Result();
         result.setColumnDef(headerDetails);
