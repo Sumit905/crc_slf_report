@@ -42,10 +42,14 @@ public class ExcelRestController {
 
 	@PostMapping(path="slfReport/stacked-chart",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfStackedChart(@RequestParam int year){
-		List<StackedColumnModel> data = slfReportService.getStackedColumnDetails(year);
+		List<StackedColumnModel> data = slfReportService.getTotalNoOfIncChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
-	
+	@PostMapping(path="slfReport/task-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayTaskChart(@RequestParam int year){
+		List<StackedColumnModel> data = slfReportService.getTaskIncChartDetails(year);
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReport(@RequestParam int year){

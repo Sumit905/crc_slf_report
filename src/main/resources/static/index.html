@@ -32,15 +32,22 @@
 
 <div class="container">
 
-</div>
+
 
 <div class="row justify-content-between align-items-center mb-5">
     <div class="col flex-shrink-0 mb-5 mb-md-0">
-        <h1 class="display-4 mb-0">SLF Dashboard</h1>
-        <div class="text-muted">SLF Weekly Report</div>
+        <h3 class="display-5 mb-0">SLF Report</h3>
     </div>
     <div class="col-12 col-md-auto">
         <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                Filter
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="#">Weekly</a></li>
+                <li><a class="dropdown-item" href="#">Monthly</a></li>
+                <li><a class="dropdown-item" href="#">Custom</a></li>
+            </ul>
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 Years
             </button>
@@ -53,62 +60,86 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-3">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link active" id="v-pills-inc-tab" data-toggle="pill" href="#v-pills-inc" role="tab" aria-controls="v-pills-inc" aria-selected="true">Total Number Incidents</a>
+            <a class="nav-link" id="v-pills-task-tab" data-toggle="pill" href="#v-pills-task" role="tab" aria-controls="v-pills-task" aria-selected="false">Task Incidents</a>
+            <a class="nav-link" id="v-pills-open-shift-tab" data-toggle="pill" href="#v-pills-open-shift" role="tab" aria-controls="v-pills-open-shift" aria-selected="false">Open-Shift Incidents</a>
+            <a class="nav-link" id="v-pills-landing-tab" data-toggle="pill" href="#v-pills-landing" role="tab" aria-controls="v-pills-landing" aria-selected="false">Landing Incidents</a>
+            <a class="nav-link" id="v-pills-batches-tab" data-toggle="pill" href="#v-pills-batches" role="tab" aria-controls="v-pills-batches" aria-selected="false">Batches Incidents</a>
+            <a class="nav-link" id="v-pills-idrs-tab" data-toggle="pill" href="#v-pills-idrs" role="tab" aria-controls="v-pills-idrs" aria-selected="false">IDRS Incidents</a>
+            <a class="nav-link" id="v-pills-data-clarification-tab" data-toggle="pill" href="#v-pills-data-clarification" role="tab" aria-controls="v-pills-data-clarification" aria-selected="false">Data Clarification Incidents</a>
+            <a class="nav-link" id="v-pills-data-correction-tab" data-toggle="pill" href="#v-pills-data-correction" role="tab" aria-controls="v-pills-data-correction" aria-selected="false">Data Correction Incidents</a>
+        </div>
+    </div>
+    <div class="col-9">
+        <div class="tab-content" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-inc" role="tabpanel" aria-labelledby="v-pills-inc-tab">
+                <div id="totalNoOfInidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                <div id="totalNoOfInident" style="height: 300px; width:98%;" class="ag-theme-alpine card-body"></div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-task" role="tabpanel" aria-labelledby="v-pills-task-tab">
+                <div id="taskIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                <div style="height: 300px; width:98%;" class="ag-theme-alpine card-body" id="taskIncident"></div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-open-shift" role="tabpanel" aria-labelledby="v-pills-open-shift-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Open Shift Incidents</div>
+                        <div id="openShiftIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-landing" role="tabpanel" aria-labelledby="v-pills-landing-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Landing Incidents</div>
+                        <div id="landingIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-batches" role="tabpanel" aria-labelledby="v-pills-batches-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Batches Incidents</div>
+                        <div id="batchesIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-idrs" role="tabpanel" aria-labelledby="v-pills-idrs-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">IDRS Incidents</div>
+                        <div id="idrsIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-data-clarification" role="tabpanel" aria-labelledby="v-pills-data-clarification-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Data Clarification Incidents</div>
+                        <div id="dataClarificationIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-data-correction" role="tabpanel" aria-labelledby="v-pills-data-correction-tab">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Data Correction Incidents</div>
+                        <div id="dataCorrectionIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div>
-    <div id="chartContainer" style="height: 300px; width: 100%"></div>
 
-    <div class="container mt-3">
-        <div class="card">
-            <div class="card-header">Total Number of Incidents</div>
-                <div id="totalNoOfInident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
 
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Task Incidents<span id="taskIncidentTotal" class="badge bg-primary"></span></div>
-            <div style="height: 300px; width:100%;" class="ag-theme-alpine card-body" id="taskIncident"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Open Shift Incidents</div>
-            <div id="openShiftIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Landing Incidents</div>
-            <div id="landingIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Batches Incidents</div>
-            <div id="batchesIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">IDRS Incidents</div>
-            <div id="idrsIncident" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Data Clarification Incidents</div>
-            <div id="dataClarificationIncident" style="height: 500px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">Data Correction Incidents</div>
-            <div id="dataCorrectionIncident" style="height: 500px; width:100%;" class="ag-theme-alpine card-body"></div>
-        </div>
-    </div>
+
 
 
 </div>
-
 </body>
 </html>

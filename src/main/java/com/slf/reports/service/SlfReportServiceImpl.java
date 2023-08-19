@@ -153,7 +153,7 @@ class SlfReportServiceImpl implements SlfReportService {
     }
 
     @Override
-    public List<StackedColumnModel> getStackedColumnDetails(int year) {
+    public List<StackedColumnModel> getTotalNoOfIncChartDetails(int year) {
 
         List<StackedColumnModel> data = new ArrayList<>();
         StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
@@ -236,16 +236,113 @@ class SlfReportServiceImpl implements SlfReportService {
         return data;
     }
 
-    public Result fetchTableHeaderDetails(int year) {
+
+    @Override
+    public List<StackedColumnModel> getTaskIncChartDetails(int year) {
+
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel ctaskStackedColumnModel = new StackedColumnModel();
+        ctaskStackedColumnModel.setType(STACKED_COLUMN);
+        ctaskStackedColumnModel.setName(CTASK);
+        ctaskStackedColumnModel.setShowInLegend("true");
+        ctaskStackedColumnModel.setyValueFormatString("## "+CTASK+" Incidents");
+
+        StackedColumnModel sctaskStackedColumnModel = new StackedColumnModel();
+        sctaskStackedColumnModel.setType(STACKED_COLUMN);
+        sctaskStackedColumnModel.setName(SCTASK);
+        sctaskStackedColumnModel.setShowInLegend("true");
+        sctaskStackedColumnModel.setyValueFormatString("## "+SCTASK+" Incidents");
+
+        StackedColumnModel ptaskStackedColumnModel = new StackedColumnModel();
+        ptaskStackedColumnModel.setType(STACKED_COLUMN);
+        ptaskStackedColumnModel.setName(PTASK);
+        ptaskStackedColumnModel.setShowInLegend("true");
+        ptaskStackedColumnModel.setyValueFormatString("## "+PTASK+" Incidents");
+
+        StackedColumnModel ritmStackedColumnModel = new StackedColumnModel();
+        ritmStackedColumnModel.setType(STACKED_COLUMN);
+        ritmStackedColumnModel.setName(RITM);
+        ritmStackedColumnModel.setShowInLegend("true");
+        ritmStackedColumnModel.setyValueFormatString("## "+RITM+" Incidents");
+
+        StackedColumnModel prbStackedColumnModel = new StackedColumnModel();
+        prbStackedColumnModel.setType(STACKED_COLUMN);
+        prbStackedColumnModel.setName(PRB);
+        prbStackedColumnModel.setShowInLegend("true");
+        prbStackedColumnModel.setyValueFormatString("## "+PRB+" Incidents");
+
+        List<DataPointsModel> ctaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> sctaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> ptaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> ritmDataPoint = new ArrayList<>();
+        List<DataPointsModel> prbDataPoint = new ArrayList<>();
+
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals("CH & CTASK".toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            ctaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(SCTASK.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            sctaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(PTASK.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            ptaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(RITM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            ritmDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(PRB.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            prbDataPoint.add(dataPointsModel);
+        });
+        ctaskStackedColumnModel.setDataPoints(ctaskDataPoint);
+        sctaskStackedColumnModel.setDataPoints(sctaskDataPoint);
+        ptaskStackedColumnModel.setDataPoints(ptaskDataPoint);
+        ritmStackedColumnModel.setDataPoints(ritmDataPoint);
+        prbStackedColumnModel.setDataPoints(prbDataPoint);
+        data.add(ctaskStackedColumnModel);
+        data.add(sctaskStackedColumnModel);
+        data.add(ptaskStackedColumnModel);
+        data.add(ritmStackedColumnModel);
+        data.add(prbStackedColumnModel);
+        return data;
+    }
+
+
+    private static List<HeaderDetails> getHeaderDetails(String columnName, int year){
         List<HeaderDetails> headerDetails = new ArrayList<>();
         HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Priority");
+        headerDetail.setHeaderName(columnName);
         headerDetail.setField(PRIORITY);
         headerDetail.setPinned(LEFT);
         headerDetails.add(headerDetail);
-
         AtomicInteger i = new AtomicInteger();
-
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            HeaderDetails details = new HeaderDetails();
+            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
+            details.setField("W" + (i.incrementAndGet()));
+            headerDetails.add(details);
+        });
+        return headerDetails;
+    }
+    public Result fetchTableHeaderDetails(int year) {
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Priority",year);
+        AtomicInteger i = new AtomicInteger();
         List<Map<String, String>> rowDetails = new ArrayList<>();
         Map<String, String> criticalMap = new HashMap<>();
         Map<String, String> urgentMap = new HashMap<>();
@@ -259,10 +356,7 @@ class SlfReportServiceImpl implements SlfReportService {
         lowMap.put(PRIORITY, LOW);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
@@ -295,15 +389,8 @@ class SlfReportServiceImpl implements SlfReportService {
     }
 
     public Result fetchTaskDetails(int year) {
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Tasks");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Tasks",year);
         AtomicInteger i = new AtomicInteger();
-
         List<Map<String, String>> rowDetails = new ArrayList<>();
         Map<String, String> ctaskMap = new HashMap<>();
         Map<String, String> sctaskMap = new HashMap<>();
@@ -317,10 +404,7 @@ class SlfReportServiceImpl implements SlfReportService {
         prbMap.put(PRIORITY, PRB);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             ctaskMap.put("W" + i,
                          slfReportDetails.stream()
@@ -352,15 +436,8 @@ class SlfReportServiceImpl implements SlfReportService {
     }
 
     public Result fetchOpenshiftTableDetails(int year) {
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Priority");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Priority",year);
         AtomicInteger i = new AtomicInteger();
-
         List<Map<String, String>> rowDetails = new ArrayList<>();
         Map<String, String> criticalMap = new HashMap<>();
         Map<String, String> urgentMap = new HashMap<>();
@@ -374,10 +451,7 @@ class SlfReportServiceImpl implements SlfReportService {
         lowMap.put(PRIORITY, LOW);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
@@ -417,15 +491,8 @@ class SlfReportServiceImpl implements SlfReportService {
     }
 
     public Result fetchLandingTableDetails(int year) {
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Priority");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Priority",year);
         AtomicInteger i = new AtomicInteger();
-
         List<Map<String, String>> rowDetails = new ArrayList<>();
         Map<String, String> criticalMap = new HashMap<>();
         Map<String, String> urgentMap = new HashMap<>();
@@ -439,10 +506,7 @@ class SlfReportServiceImpl implements SlfReportService {
         lowMap.put(PRIORITY, LOW);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(rec.getFromDate(), rec.getToDate());
             criticalMap.put("W" + i,
                             slfReportDetails.stream()
@@ -483,13 +547,7 @@ class SlfReportServiceImpl implements SlfReportService {
 
     public Result fetchTableBatchesDetails(int year) {
 
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Priority");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Priority",year);
         AtomicInteger i = new AtomicInteger();
 
         List<Map<String, String>> rowDetails = new ArrayList<>();
@@ -505,10 +563,7 @@ class SlfReportServiceImpl implements SlfReportService {
         lowMap.put(PRIORITY, LOW);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails =
                     fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), CRC_BATCHES);
             criticalMap.put("W" + i,
@@ -544,13 +599,7 @@ class SlfReportServiceImpl implements SlfReportService {
 
     public Result fetchTableIdrsDetails(int year) {
 
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Priority");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Priority",year);
         AtomicInteger i = new AtomicInteger();
 
         List<Map<String, String>> rowDetails = new ArrayList<>();
@@ -566,10 +615,7 @@ class SlfReportServiceImpl implements SlfReportService {
         lowMap.put(PRIORITY, LOW);
 
         FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (i.incrementAndGet()));
-            headerDetails.add(details);
+            i.incrementAndGet();
             List<ReportDetails> slfReportDetails =
                     fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), IDRS);
             criticalMap.put("W" + i,
@@ -605,24 +651,10 @@ class SlfReportServiceImpl implements SlfReportService {
 
     public Result fetchDateClarificationDetails(int year) {
 
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Consumer");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
-
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Consumer",year);
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
         List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
-        AtomicInteger di = new AtomicInteger();
-        weeklyRequestParams.forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (di.incrementAndGet()));
-            headerDetails.add(details);
-        });
-
         sheetNames.forEach(sheetName -> {
             Map<String, String> consumerMap = new HashMap<>();
             consumerMap.put(PRIORITY, sheetName);
@@ -646,23 +678,10 @@ class SlfReportServiceImpl implements SlfReportService {
 
     public Result fetchDateCorrectionDetails(int year) {
 
-        List<HeaderDetails> headerDetails = new ArrayList<>();
-        HeaderDetails headerDetail = new HeaderDetails();
-        headerDetail.setHeaderName("Consumer");
-        headerDetail.setField(PRIORITY);
-        headerDetail.setPinned(LEFT);
-        headerDetails.add(headerDetail);
+        List<HeaderDetails> headerDetails = SlfReportServiceImpl.getHeaderDetails("Consumer",year);
         List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
         List<Map<String, String>> rowDetails = new ArrayList<>();
         List<String> sheetNames = fetchSheetNamesWithTask();
-        AtomicInteger di = new AtomicInteger();
-        weeklyRequestParams.forEach(rec -> {
-            HeaderDetails details = new HeaderDetails();
-            details.setHeaderName(rec.getFromDate() + " - " + rec.getToDate());
-            details.setField("W" + (di.incrementAndGet()));
-            headerDetails.add(details);
-        });
-
         for(String sheetName : sheetNames){
             Map<String, String> consumerMap = new HashMap<>();
             consumerMap.put(PRIORITY, sheetName);

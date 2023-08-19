@@ -27,7 +27,8 @@ public interface SlfReportService {
 
 	List<String> fetchSheetNamesWithTask();
 
-	List<StackedColumnModel> getStackedColumnDetails(int year);
+	List<StackedColumnModel> getTotalNoOfIncChartDetails(int year);
+	List<StackedColumnModel> getTaskIncChartDetails(int year);
 
 	Result fetchTableHeaderDetails(int year);
 	

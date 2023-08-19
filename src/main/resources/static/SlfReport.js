@@ -76,34 +76,101 @@ $(document)
                         }
 
 
+                    $('#v-pills-tab a').on('click', function (e) {
+                                      e.preventDefault()
+                          var selText = $(this).parents('.container').find('#dropdownMenuButton1').text().trim();
+                          switch(this.id){
+                                case "v-pills-inc-tab":{
+                                    $.ajax({
+                                            url : "../slfReport/stacked-chart?year="+selText,
+                                            type : 'Post',
+                                            contentType : "application/json; charset=utf-8",
+                                            success : function(result) {
+                                                var chart = new CanvasJS.Chart("totalNoOfInidentChart", {
+                                                    animationEnabled : true,
+                                                    title : {
+                                                        text : "Total Number of Incidents"
+                                                    },
+                                                    axisY : {
+                                                        title : "Number Of Incidents"
+                                                    },
+                                                    axisX: {
+                                                        interval: 1
+                                                    },
+                                                    toolTip : {
+                                                        shared : true,
+                                                        reversed : true
+                                                    },
+                                                    data : eval(result)
+                                                });
 
+                                                chart.render();
+                                            }
+                                        });
+                                 break;
+                                }
+                               case "v-pills-task-tab":{
+                                    $.ajax({
+                                        url : "../slfReport/task-chart?year="+selText,
+                                        type : 'Post',
+                                        contentType : "application/json; charset=utf-8",
+                                        success : function(result) {
+                                            var chart = new CanvasJS.Chart("taskIncidentChart", {
+                                                animationEnabled : true,
+                                                title : {
+                                                    text : "Total Number of Task Incidents"
+                                                },
+                                                axisY : {
+                                                    title : "Number Of Incidents"
+                                                },
+                                                axisX: {
+                                                    interval: 1
+                                                },
+                                                toolTip : {
+                                                    shared : true,
+                                                    reversed : true
+                                                },
+                                                data : eval(result)
+                                            });
+
+                                            chart.render();
+                                        }
+                                    });
+                                    break;
+                               }
+
+                          }
+                          $(this).tab('show');
+                    });
                    $(".dropdown-menu li a").click(function(){
                      var selText = $(this).text();
-                     $(this).parents('.dropdown').find('.dropdown-toggle').html(selText+' <span class="caret"></span>');
+                     $(this).parents('.dropdown').find('#dropdownMenuButton1').html(selText+' <span class="caret"></span>');
+                      $.ajax({
+                         url : "../slfReport/stacked-chart?year="+selText,
+                         type : 'Post',
+                         contentType : "application/json; charset=utf-8",
+                         success : function(result) {
+                             var chart = new CanvasJS.Chart("totalNoOfInidentChart", {
+                                 animationEnabled : true,
+                                 title : {
+                                     text : "Total Number of Incidents"
+                                 },
+                                 axisY : {
+                                     title : "Number Of Incidents"
+                                 },
+                                 axisX: {
+                                     interval: 1
+                                 },
+                                 toolTip : {
+                                     shared : true,
+                                     reversed : true
+                                 },
+                                 data : eval(result)
+                             });
 
-                     $.ajax({
-                        url : "../slfReport/stacked-chart?year="+selText,
-                        type : 'Post',
-                        contentType : "application/json; charset=utf-8",
-                        success : function(result) {
-                            var chart = new CanvasJS.Chart("chartContainer", {
-                                animationEnabled : true,
-                                title : {
-                                    text : "Total Number of Incidents"
-                                },
-                                axisY : {
-                                    title : "Number Of Incidents"
-                                },
-                                toolTip : {
-                                    shared : true,
-                                    reversed : true
-                                },
-                                data : eval(result)
-                            });
-
-                            chart.render();
-                        }
-                    });
+                             chart.render();
+                         }
+                     });
                         for(let rec of gridOptions){
                              $.ajax({
                                    url : rec.gridUrl+selText,
