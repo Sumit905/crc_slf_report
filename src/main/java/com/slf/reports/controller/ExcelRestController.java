@@ -50,6 +50,29 @@ public class ExcelRestController {
 		List<StackedColumnModel> data = slfReportService.getTaskIncChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
+	@PostMapping(path="slfReport/open-shift-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayOpenShiftChart(@RequestParam int year){
+		List<StackedColumnModel> data = slfReportService.getTotalOpenShiftChartDetails(year);
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/landing-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayLandingChart(@RequestParam int year){
+		List<StackedColumnModel> data = slfReportService.getTotalLandingChartDetails(year);
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/batches-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayBatchesChart(@RequestParam int year){
+		List<StackedColumnModel> data = slfReportService.getTotalBatchesChartDetails(year);
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/idrs-chart",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayIdresChart(@RequestParam int year){
+		List<StackedColumnModel> data = slfReportService.getTotalIdresChartDetails(year);
+		return new ResponseEntity<Object>(data, HttpStatus.OK);
+	}
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReport(@RequestParam int year){

@@ -138,6 +138,126 @@ $(document)
                                     });
                                     break;
                                }
+                               case "v-pills-open-shift-tab":
+                               {
+                                $.ajax({
+                                    url : "../slfReport/open-shift-chart?year="+selText,
+                                    type : 'Post',
+                                    contentType : "application/json; charset=utf-8",
+                                    success : function(result) {
+                                        var chart = new CanvasJS.Chart("openShiftIncidentChart", {
+                                            animationEnabled : true,
+                                            title : {
+                                                text : "Open Shift Incidents"
+                                            },
+                                            axisY : {
+                                                title : "Number Of Incidents"
+                                            },
+                                            axisX: {
+                                                interval: 1
+                                            },
+                                            toolTip : {
+                                                shared : true,
+                                                reversed : true
+                                            },
+                                            data : eval(result)
+                                        });
+
+                                        chart.render();
+                                    }
+                                });
+                                break;
+                               }
+                               case "v-pills-landing-tab":
+                               {
+                                    $.ajax({
+                                        url : "../slfReport/landing-chart?year="+selText,
+                                        type : 'Post',
+                                        contentType : "application/json; charset=utf-8",
+                                        success : function(result) {
+                                            var chart = new CanvasJS.Chart("landingIncidentChart", {
+                                                animationEnabled : true,
+                                                title : {
+                                                    text : "Landing Incidents"
+                                                },
+                                                axisY : {
+                                                    title : "Number Of Incidents"
+                                                },
+                                                axisX: {
+                                                    interval: 1
+                                                },
+                                                toolTip : {
+                                                    shared : true,
+                                                    reversed : true
+                                                },
+                                                data : eval(result)
+                                            });
+
+                                            chart.render();
+                                        }
+                                    });
+                                   break;
+                               }
+                               case "v-pills-batches-tab":
+                              {
+                                $.ajax({
+                                    url : "../slfReport/batches-chart?year="+selText,
+                                    type : 'Post',
+                                    contentType : "application/json; charset=utf-8",
+                                    success : function(result) {
+                                        var chart = new CanvasJS.Chart("batchesIncidentChart", {
+                                            animationEnabled : true,
+                                            title : {
+                                                text : "Batches Incidents"
+                                            },
+                                            axisY : {
+                                                title : "Number Of Incidents"
+                                            },
+                                            axisX: {
+                                                interval: 1
+                                            },
+                                            toolTip : {
+                                                shared : true,
+                                                reversed : true
+                                            },
+                                            data : eval(result)
+                                        });
+
+                                        chart.render();
+                                    }
+                                });
+                                  break;
+                              }
+                              case "v-pills-idrs-tab":
+                                {
+                                $.ajax({
+                                    url : "../slfReport/idrs-chart?year="+selText,
+                                    type : 'Post',
+                                    contentType : "application/json; charset=utf-8",
+                                    success : function(result) {
+                                        var chart = new CanvasJS.Chart("idrsIncidentChart", {
+                                            animationEnabled : true,
+                                            title : {
+                                                text : "IDRS Incidents"
+                                            },
+                                            axisY : {
+                                                title : "Number Of Incidents"
+                                            },
+                                            axisX: {
+                                                interval: 1
+                                            },
+                                            toolTip : {
+                                                shared : true,
+                                                reversed : true
+                                            },
+                                            data : eval(result)
+                                        });
+
+                                        chart.render();
+                                    }
+                                });
+                                    break;
+                                }
 
                           }
                           $(this).tab('show');

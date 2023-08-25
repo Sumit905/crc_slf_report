@@ -30,6 +30,12 @@ public interface SlfReportService {
 	List<StackedColumnModel> getTotalNoOfIncChartDetails(int year);
 	List<StackedColumnModel> getTaskIncChartDetails(int year);
 
+	public List<StackedColumnModel> getTotalOpenShiftChartDetails(int year);
+
+	public List<StackedColumnModel> getTotalLandingChartDetails(int year);
+	public List<StackedColumnModel> getTotalBatchesChartDetails(int year);
+	public List<StackedColumnModel> getTotalIdresChartDetails(int year);
+
 	Result fetchTableHeaderDetails(int year);
 	
 	Result fetchTableBatchesDetails(int year);

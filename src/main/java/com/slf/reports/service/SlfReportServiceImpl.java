@@ -236,7 +236,342 @@ class SlfReportServiceImpl implements SlfReportService {
         return data;
     }
 
+    @Override
+    public List<StackedColumnModel> getTotalOpenShiftChartDetails(int year) {
 
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
+        criticalStackedColumnModel.setType(STACKED_COLUMN);
+        criticalStackedColumnModel.setName(CRITICAL);
+        criticalStackedColumnModel.setShowInLegend("true");
+        criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
+        StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
+        urgentStackedColumnModel.setType(STACKED_COLUMN);
+        urgentStackedColumnModel.setName(URGENT);
+        urgentStackedColumnModel.setShowInLegend("true");
+        urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
+        StackedColumnModel highStackedColumnModel = new StackedColumnModel();
+        highStackedColumnModel.setType(STACKED_COLUMN);
+        highStackedColumnModel.setName(HIGH);
+        highStackedColumnModel.setShowInLegend("true");
+        highStackedColumnModel.setyValueFormatString("## High Incidents");
+
+        StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
+        mediumStackedColumnModel.setType(STACKED_COLUMN);
+        mediumStackedColumnModel.setName(MEDIUM);
+        mediumStackedColumnModel.setShowInLegend("true");
+        mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
+
+        StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
+        lowStackedColumnModel.setType(STACKED_COLUMN);
+        lowStackedColumnModel.setName(LOW);
+        lowStackedColumnModel.setShowInLegend("true");
+        lowStackedColumnModel.setyValueFormatString("## Low Incidents");
+
+        List<DataPointsModel> criticalDataPoint = new ArrayList<>();
+        List<DataPointsModel> urgentDataPoint = new ArrayList<>();
+        List<DataPointsModel> highDataPoint = new ArrayList<>();
+        List<DataPointsModel> mediumDataPoint = new ArrayList<>();
+        List<DataPointsModel> lowDataPoint = new ArrayList<>();
+
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(),IPIX);
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            criticalDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            urgentDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            highDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            mediumDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            lowDataPoint.add(dataPointsModel);
+        });
+        criticalStackedColumnModel.setDataPoints(criticalDataPoint);
+        urgentStackedColumnModel.setDataPoints(urgentDataPoint);
+        highStackedColumnModel.setDataPoints(highDataPoint);
+        mediumStackedColumnModel.setDataPoints(mediumDataPoint);
+        lowStackedColumnModel.setDataPoints(lowDataPoint);
+        data.add(criticalStackedColumnModel);
+        data.add(urgentStackedColumnModel);
+        data.add(highStackedColumnModel);
+        data.add(mediumStackedColumnModel);
+        data.add(lowStackedColumnModel);
+        return data;
+    }
+
+
+    @Override
+    public List<StackedColumnModel> getTotalLandingChartDetails(int year) {
+
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
+        criticalStackedColumnModel.setType(STACKED_COLUMN);
+        criticalStackedColumnModel.setName(CRITICAL);
+        criticalStackedColumnModel.setShowInLegend("true");
+        criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
+        StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
+        urgentStackedColumnModel.setType(STACKED_COLUMN);
+        urgentStackedColumnModel.setName(URGENT);
+        urgentStackedColumnModel.setShowInLegend("true");
+        urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
+        StackedColumnModel highStackedColumnModel = new StackedColumnModel();
+        highStackedColumnModel.setType(STACKED_COLUMN);
+        highStackedColumnModel.setName(HIGH);
+        highStackedColumnModel.setShowInLegend("true");
+        highStackedColumnModel.setyValueFormatString("## High Incidents");
+
+        StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
+        mediumStackedColumnModel.setType(STACKED_COLUMN);
+        mediumStackedColumnModel.setName(MEDIUM);
+        mediumStackedColumnModel.setShowInLegend("true");
+        mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
+
+        StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
+        lowStackedColumnModel.setType(STACKED_COLUMN);
+        lowStackedColumnModel.setName(LOW);
+        lowStackedColumnModel.setShowInLegend("true");
+        lowStackedColumnModel.setyValueFormatString("## Low Incidents");
+
+        List<DataPointsModel> criticalDataPoint = new ArrayList<>();
+        List<DataPointsModel> urgentDataPoint = new ArrayList<>();
+        List<DataPointsModel> highDataPoint = new ArrayList<>();
+        List<DataPointsModel> mediumDataPoint = new ArrayList<>();
+        List<DataPointsModel> lowDataPoint = new ArrayList<>();
+
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(),LANDING);
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            criticalDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            urgentDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            highDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            mediumDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            lowDataPoint.add(dataPointsModel);
+        });
+        criticalStackedColumnModel.setDataPoints(criticalDataPoint);
+        urgentStackedColumnModel.setDataPoints(urgentDataPoint);
+        highStackedColumnModel.setDataPoints(highDataPoint);
+        mediumStackedColumnModel.setDataPoints(mediumDataPoint);
+        lowStackedColumnModel.setDataPoints(lowDataPoint);
+        data.add(criticalStackedColumnModel);
+        data.add(urgentStackedColumnModel);
+        data.add(highStackedColumnModel);
+        data.add(mediumStackedColumnModel);
+        data.add(lowStackedColumnModel);
+        return data;
+    }
+
+    @Override
+    public List<StackedColumnModel> getTotalBatchesChartDetails(int year) {
+
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
+        criticalStackedColumnModel.setType(STACKED_COLUMN);
+        criticalStackedColumnModel.setName(CRITICAL);
+        criticalStackedColumnModel.setShowInLegend("true");
+        criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
+        StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
+        urgentStackedColumnModel.setType(STACKED_COLUMN);
+        urgentStackedColumnModel.setName(URGENT);
+        urgentStackedColumnModel.setShowInLegend("true");
+        urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
+        StackedColumnModel highStackedColumnModel = new StackedColumnModel();
+        highStackedColumnModel.setType(STACKED_COLUMN);
+        highStackedColumnModel.setName(HIGH);
+        highStackedColumnModel.setShowInLegend("true");
+        highStackedColumnModel.setyValueFormatString("## High Incidents");
+
+        StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
+        mediumStackedColumnModel.setType(STACKED_COLUMN);
+        mediumStackedColumnModel.setName(MEDIUM);
+        mediumStackedColumnModel.setShowInLegend("true");
+        mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
+
+        StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
+        lowStackedColumnModel.setType(STACKED_COLUMN);
+        lowStackedColumnModel.setName(LOW);
+        lowStackedColumnModel.setShowInLegend("true");
+        lowStackedColumnModel.setyValueFormatString("## Low Incidents");
+
+        List<DataPointsModel> criticalDataPoint = new ArrayList<>();
+        List<DataPointsModel> urgentDataPoint = new ArrayList<>();
+        List<DataPointsModel> highDataPoint = new ArrayList<>();
+        List<DataPointsModel> mediumDataPoint = new ArrayList<>();
+        List<DataPointsModel> lowDataPoint = new ArrayList<>();
+
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(),CRC_BATCHES);
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            criticalDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            urgentDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            highDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            mediumDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            lowDataPoint.add(dataPointsModel);
+        });
+        criticalStackedColumnModel.setDataPoints(criticalDataPoint);
+        urgentStackedColumnModel.setDataPoints(urgentDataPoint);
+        highStackedColumnModel.setDataPoints(highDataPoint);
+        mediumStackedColumnModel.setDataPoints(mediumDataPoint);
+        lowStackedColumnModel.setDataPoints(lowDataPoint);
+        data.add(criticalStackedColumnModel);
+        data.add(urgentStackedColumnModel);
+        data.add(highStackedColumnModel);
+        data.add(mediumStackedColumnModel);
+        data.add(lowStackedColumnModel);
+        return data;
+    }
+
+    @Override
+    public List<StackedColumnModel> getTotalIdresChartDetails(int year) {
+
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel criticalStackedColumnModel = new StackedColumnModel();
+        criticalStackedColumnModel.setType(STACKED_COLUMN);
+        criticalStackedColumnModel.setName(CRITICAL);
+        criticalStackedColumnModel.setShowInLegend("true");
+        criticalStackedColumnModel.setyValueFormatString("## Critical Incidents");
+        StackedColumnModel urgentStackedColumnModel = new StackedColumnModel();
+        urgentStackedColumnModel.setType(STACKED_COLUMN);
+        urgentStackedColumnModel.setName(URGENT);
+        urgentStackedColumnModel.setShowInLegend("true");
+        urgentStackedColumnModel.setyValueFormatString("## Urgent Incidents");
+        StackedColumnModel highStackedColumnModel = new StackedColumnModel();
+        highStackedColumnModel.setType(STACKED_COLUMN);
+        highStackedColumnModel.setName(HIGH);
+        highStackedColumnModel.setShowInLegend("true");
+        highStackedColumnModel.setyValueFormatString("## High Incidents");
+
+        StackedColumnModel mediumStackedColumnModel = new StackedColumnModel();
+        mediumStackedColumnModel.setType(STACKED_COLUMN);
+        mediumStackedColumnModel.setName(MEDIUM);
+        mediumStackedColumnModel.setShowInLegend("true");
+        mediumStackedColumnModel.setyValueFormatString("## Medium Incidents");
+
+        StackedColumnModel lowStackedColumnModel = new StackedColumnModel();
+        lowStackedColumnModel.setType(STACKED_COLUMN);
+        lowStackedColumnModel.setName(LOW);
+        lowStackedColumnModel.setShowInLegend("true");
+        lowStackedColumnModel.setyValueFormatString("## Low Incidents");
+
+        List<DataPointsModel> criticalDataPoint = new ArrayList<>();
+        List<DataPointsModel> urgentDataPoint = new ArrayList<>();
+        List<DataPointsModel> highDataPoint = new ArrayList<>();
+        List<DataPointsModel> mediumDataPoint = new ArrayList<>();
+        List<DataPointsModel> lowDataPoint = new ArrayList<>();
+
+        FridayAndThursdayDates.getWeeklyDays(year).forEach(rec -> {
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(),IDRS);
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(CRITICAL.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            criticalDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(URGENT.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            urgentDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(HIGH.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            highDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(MEDIUM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            mediumDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getPriority().equals(LOW.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(rec.getFromDate() + " - " + rec.getToDate());
+            lowDataPoint.add(dataPointsModel);
+        });
+        criticalStackedColumnModel.setDataPoints(criticalDataPoint);
+        urgentStackedColumnModel.setDataPoints(urgentDataPoint);
+        highStackedColumnModel.setDataPoints(highDataPoint);
+        mediumStackedColumnModel.setDataPoints(mediumDataPoint);
+        lowStackedColumnModel.setDataPoints(lowDataPoint);
+        data.add(criticalStackedColumnModel);
+        data.add(urgentStackedColumnModel);
+        data.add(highStackedColumnModel);
+        data.add(mediumStackedColumnModel);
+        data.add(lowStackedColumnModel);
+        return data;
+    }
     @Override
     public List<StackedColumnModel> getTaskIncChartDetails(int year) {
 
