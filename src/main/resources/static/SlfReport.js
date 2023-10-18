@@ -111,7 +111,7 @@ $(document)
                                 }
                                case "v-pills-task-tab":{
                                     $.ajax({
-                                        url : "../slfReport/chart/task?year="+selText,
+                                        url : "../slfReport/chart/task/"+selText,
                                         type : 'Post',
                                         contentType : "application/json; charset=utf-8",
                                         success : function(result) {
@@ -141,7 +141,7 @@ $(document)
                                case "v-pills-open-shift-tab":
                                {
                                 $.ajax({
-                                    url : "../slfReport/chart/open-shift?year="+selText,
+                                    url : "../slfReport/chart/open-shift/"+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
@@ -171,7 +171,7 @@ $(document)
                                case "v-pills-landing-tab":
                                {
                                     $.ajax({
-                                        url : "../slfReport/chart/landing?year="+selText,
+                                        url : "../slfReport/chart/landing/"+selText,
                                         type : 'Post',
                                         contentType : "application/json; charset=utf-8",
                                         success : function(result) {
@@ -201,7 +201,7 @@ $(document)
                                case "v-pills-batches-tab":
                               {
                                 $.ajax({
-                                    url : "../slfReport/chart/batches?year="+selText,
+                                    url : "../slfReport/chart/batches/"+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
@@ -231,7 +231,7 @@ $(document)
                               case "v-pills-idrs-tab":
                                 {
                                 $.ajax({
-                                    url : "../slfReport/chart/idrs?year="+selText,
+                                    url : "../slfReport/chart/idrs/"+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
@@ -266,7 +266,7 @@ $(document)
                      var selText = $(this).text();
                      $(this).parents('.dropdown').find('#dropdownMenuButton1').html(selText+' <span class="caret"></span>');
                       $.ajax({
-                         url : "../slfReport/stacked-chart?year="+selText,
+                         url : "../slfReport/chart/stacked/"+selText,
                          type : 'Post',
                          contentType : "application/json; charset=utf-8",
                          success : function(result) {
