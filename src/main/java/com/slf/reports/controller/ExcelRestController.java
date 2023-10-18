@@ -1,23 +1,25 @@
 package com.slf.reports.controller;
 
 import com.slf.reports.entity.ReportDetails;
-import com.slf.reports.response.ResponseModel;
 import com.slf.reports.response.Result;
 import com.slf.reports.response.StackedColumnModel;
 import com.slf.reports.service.SlfReportService;
-import com.slf.reports.utils.FridayAndThursdayDates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,36 +42,36 @@ public class ExcelRestController {
 		return new ResponseEntity<Object>(slfReportDetails, HttpStatus.OK);
 	}
 
-	@PostMapping(path="slfReport/stacked-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displaySlfStackedChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/stacked/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displaySlfStackedChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalNoOfIncChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
-	@PostMapping(path="slfReport/task-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayTaskChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/task/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayTaskChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTaskIncChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
-	@PostMapping(path="slfReport/open-shift-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayOpenShiftChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/open-shift/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayOpenShiftChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalOpenShiftChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
 
-	@PostMapping(path="slfReport/landing-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayLandingChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/landing/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayLandingChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalLandingChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
 
-	@PostMapping(path="slfReport/batches-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayBatchesChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/batches/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayBatchesChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalBatchesChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}
 
-	@PostMapping(path="slfReport/idrs-chart",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayIdresChart(@RequestParam int year){
+	@PostMapping(path="slfReport/chart/idrs/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> displayIdresChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalIdresChartDetails(year);
 		return new ResponseEntity<Object>(data, HttpStatus.OK);
 	}

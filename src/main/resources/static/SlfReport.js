@@ -82,7 +82,7 @@ $(document)
                           switch(this.id){
                                 case "v-pills-inc-tab":{
                                     $.ajax({
-                                            url : "../slfReport/stacked-chart?year="+selText,
+                                            url : "../slfReport/chart/stacked/"+selText,
                                             type : 'Post',
                                             contentType : "application/json; charset=utf-8",
                                             success : function(result) {
@@ -111,7 +111,7 @@ $(document)
                                 }
                                case "v-pills-task-tab":{
                                     $.ajax({
-                                        url : "../slfReport/task-chart?year="+selText,
+                                        url : "../slfReport/chart/task?year="+selText,
                                         type : 'Post',
                                         contentType : "application/json; charset=utf-8",
                                         success : function(result) {
@@ -141,7 +141,7 @@ $(document)
                                case "v-pills-open-shift-tab":
                                {
                                 $.ajax({
-                                    url : "../slfReport/open-shift-chart?year="+selText,
+                                    url : "../slfReport/chart/open-shift?year="+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
@@ -171,14 +171,14 @@ $(document)
                                case "v-pills-landing-tab":
                                {
                                     $.ajax({
-                                        url : "../slfReport/landing-chart?year="+selText,
+                                        url : "../slfReport/chart/landing?year="+selText,
                                         type : 'Post',
                                         contentType : "application/json; charset=utf-8",
                                         success : function(result) {
                                             var chart = new CanvasJS.Chart("landingIncidentChart", {
                                                 animationEnabled : true,
                                                 title : {
-                                                    text : "Landing Incidents"
+                                                    text : "Landing Incidents"  
                                                 },
                                                 axisY : {
                                                     title : "Number Of Incidents"
@@ -201,7 +201,7 @@ $(document)
                                case "v-pills-batches-tab":
                               {
                                 $.ajax({
-                                    url : "../slfReport/batches-chart?year="+selText,
+                                    url : "../slfReport/chart/batches?year="+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
@@ -231,7 +231,7 @@ $(document)
                               case "v-pills-idrs-tab":
                                 {
                                 $.ajax({
-                                    url : "../slfReport/idrs-chart?year="+selText,
+                                    url : "../slfReport/chart/idrs?year="+selText,
                                     type : 'Post',
                                     contentType : "application/json; charset=utf-8",
                                     success : function(result) {
