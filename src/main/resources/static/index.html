@@ -41,7 +41,7 @@
     <div class="col-12 col-md-auto">
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                Filter
+                Years
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li><a class="dropdown-item" href="#">Weekly</a></li>
@@ -59,10 +59,8 @@
         </div>
     </div>
 </div>
-
-<div class="row">
-    <div class="col-3">
-        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+    <nav>
+        <div class="nav nav-tabs" id="v-pills-tab" role="tablist">
             <a class="nav-link active" id="v-pills-inc-tab" data-toggle="pill" href="#v-pills-inc" role="tab" aria-controls="v-pills-inc" aria-selected="true">Total Number Incidents</a>
             <a class="nav-link" id="v-pills-task-tab" data-toggle="pill" href="#v-pills-task" role="tab" aria-controls="v-pills-task" aria-selected="false">Task Incidents</a>
             <a class="nav-link" id="v-pills-open-shift-tab" data-toggle="pill" href="#v-pills-open-shift" role="tab" aria-controls="v-pills-open-shift" aria-selected="false">Open-Shift Incidents</a>
@@ -72,8 +70,8 @@
             <a class="nav-link" id="v-pills-data-clarification-tab" data-toggle="pill" href="#v-pills-data-clarification" role="tab" aria-controls="v-pills-data-clarification" aria-selected="false">Data Clarification Incidents</a>
             <a class="nav-link" id="v-pills-data-correction-tab" data-toggle="pill" href="#v-pills-data-correction" role="tab" aria-controls="v-pills-data-correction" aria-selected="false">Data Correction Incidents</a>
         </div>
-    </div>
-    <div class="col-9">
+    </nav>
+<div class="row">
         <div class="tab-content" id="v-pills-tabContent">
             <div class="tab-pane fade show active" id="v-pills-inc" role="tabpanel" aria-labelledby="v-pills-inc-tab">
                 <div id="totalNoOfInidentChart" style="margin:5px;height: 300px; width: 98%"></div>
@@ -116,7 +114,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 
