@@ -32,67 +32,67 @@ public class ExcelRestController {
 	@PostMapping("excel")
 	public ResponseEntity<String> excelReader(@RequestParam("file") MultipartFile excel) throws ParseException, IOException {
 		List<ReportDetails> reportDetailsList = slfReportService.saveReportDetails(excel);
-		return new ResponseEntity<String>("Excel file imported successfully.", HttpStatus.OK);
+		return new ResponseEntity<>("Excel file imported successfully.", HttpStatus.OK);
 	}
 
 
 	@PutMapping(path="slfReport", produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByDate(@RequestParam String fromDate, @RequestParam String toDate){
 		List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDate(LocalDate.parse(fromDate), LocalDate.parse(toDate));
-		return new ResponseEntity<Object>(slfReportDetails, HttpStatus.OK);
+		return new ResponseEntity<>(slfReportDetails, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/total-incident/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfStackedChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalNoOfIncChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 	@PostMapping(path="slfReport/task-details/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displayTaskChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTaskIncChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 	@PostMapping(path="slfReport/openshift-details/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displayOpenShiftChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalOpenShiftChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/landing-details/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displayLandingChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalLandingChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/batch-details/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displayBatchesChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalBatchesChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/idrs-details/chart/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> displayIdresChart(@PathVariable int year){
+	public ResponseEntity<Object> displayIdrsChart(@PathVariable int year){
 		List<StackedColumnModel> data = slfReportService.getTotalIdresChartDetails(year);
-		return new ResponseEntity<Object>(data, HttpStatus.OK);
+		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
 
 	@GetMapping(path="slfReport",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReport(@RequestParam int year){
-		return new ResponseEntity<Object>(slfReportService.fetchResponseModels(year), HttpStatus.OK);
+		return new ResponseEntity<>(slfReportService.fetchResponseModels(year), HttpStatus.OK);
 	}
 	
 	
 	@GetMapping(path="slfReport/consumer/{consumer}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@PathVariable("consumer")String consumer) {
 		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetails();
-		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
+		return new ResponseEntity<>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	
 	@GetMapping(path="slfReport/consumer/date",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> displaySlfReportByConsumer(@RequestParam("consumer")String consumer,@RequestParam("fromDate")String fromDate, @RequestParam("toDate")String toDate) {
 		
 		List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetailsOnBasesOfDateAndConsumer(LocalDate.parse(fromDate), LocalDate.parse(toDate), consumer);
-		return new ResponseEntity<Object>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
+		return new ResponseEntity<>(slfReportDetails.stream().filter(rec -> rec.getStream().equals(consumer.toUpperCase())), HttpStatus.OK);
 	}
 	
 	
@@ -100,10 +100,10 @@ public class ExcelRestController {
 	public ResponseEntity<Map<String,Long>> displaySlfReportByListOfConsumer() {
 		 List<ReportDetails> slfReportDetails = slfReportService.fetchReportDetails();
 		 Map<String,Long> listOfConsumer = new HashMap<String, Long>();
-		 slfReportService.fetchSheetNames().stream().forEach(sheetName ->
+		 slfReportService.fetchSheetNames().forEach(sheetName ->
 			 listOfConsumer.put(sheetName.getStream(),slfReportDetails.stream().filter(rec -> rec.getStream().equals(sheetName.getStream())).count())
 		 );
-		 return new ResponseEntity<Map<String,Long>>(listOfConsumer, HttpStatus.OK);
+		 return new ResponseEntity<>(listOfConsumer, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/total-incident/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
@@ -116,32 +116,32 @@ public class ExcelRestController {
 	public ResponseEntity<Result> getTaskDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchTaskDetails(year);
 
-		return new ResponseEntity<Result>(result, HttpStatus.OK);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/openshift-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getOpenshiftDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchOpenshiftTableDetails(year);
-		return new ResponseEntity<Result>(result, HttpStatus.OK);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/landing-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getLandingDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchLandingTableDetails(year);
-		return new ResponseEntity<Result>(result, HttpStatus.OK);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
 	@PostMapping(path="slfReport/batch-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getBatchDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchTableBatchesDetails(year);
 
-		return new ResponseEntity<Result>(result, HttpStatus.OK);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
 	@PostMapping(path="slfReport/idrs-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getIdrsDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchTableIdrsDetails(year);
-		return new ResponseEntity<Result>(result, HttpStatus.OK);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@PostMapping(path="slfReport/data/clarification-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
@@ -152,6 +152,12 @@ public class ExcelRestController {
 	@PostMapping(path="slfReport/data/correction-details/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getDataCorrectionDetails(@PathVariable int year) {
 		Result result = slfReportService.fetchDateCorrectionDetails(year);
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/{tab}/{priority}/{columnId}/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getDetailsOfInc(@PathVariable String tab,@PathVariable String priority,@PathVariable String columnId,@PathVariable int year) {
+		Result result = slfReportService.fetchDetailsOfInc(tab,priority,columnId,year);
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
 

@@ -6,6 +6,8 @@ public class WeeklyRequestParam {
     private LocalDate fromDate;
     private LocalDate toDate;
 
+    private String weeklyId;
+
     public LocalDate getFromDate() {
         return fromDate;
     }
@@ -20,5 +22,13 @@ public class WeeklyRequestParam {
 
     public void setToDate(LocalDate toDate) {
         this.toDate = toDate;
+    }
+
+    public String getWeeklyId() {
+        return weeklyId;
+    }
+
+    public void setWeeklyId(String weeklyId) {
+        this.weeklyId = weeklyId;
     }
 }

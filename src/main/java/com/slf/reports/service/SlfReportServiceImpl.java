@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -1041,6 +1042,107 @@ class SlfReportServiceImpl implements SlfReportService {
         return result;
     }
 
+    @Override
+    public Result fetchDetailsOfInc(String tab, String priority, String columnId, int year) {
+        List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
+        WeeklyRequestParam weeklyResult = weeklyRequestParams.stream().filter(rec -> rec.getWeeklyId().equals(columnId)).findFirst().orElse(null);
+        List<ReportDetails> slfReportDetails;
+        List<Map<String, String>> rowDetails= new ArrayList<>();
+        Map<String, String> tabMap = new HashMap<>();
+        tabMap.put("openshift-details",IPIX);
+        tabMap.put("landing-details",LANDING);
+        tabMap.put("batch-details",CRC_BATCHES);
+        tabMap.put("idrs-details",IDRS);
+        Map<String, String> tabDetailsMap = new HashMap<>();
+        tabDetailsMap.put("data-clarification-details",DATA_CLARIFICATION);
+        tabDetailsMap.put("data-correction-details",DATA_CORRECTION);
+        if(tab.equals("total-incident")){
+            slfReportDetails = fetchReportDetailsOnBasesOfDate(weeklyResult.getFromDate(), weeklyResult.getToDate());
+            slfReportDetails.stream().filter(rec-> rec.getPriority().equalsIgnoreCase(priority)).forEach(reportDetails ->{
+                Map<String, String> mapDetails = new HashMap<>();
+                mapDetails.put("inc",reportDetails.getIncidentNo());
+                mapDetails.put("notes",reportDetails.getWorkNotes());
+                mapDetails.put("date",reportDetails.getDate()+"");
+                mapDetails.put("priority",reportDetails.getPriority());
+                rowDetails.add(mapDetails);
+            });
+
+        }else if(tab.equals("task-details")){
+
+            slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyResult.getFromDate(),weeklyResult.getToDate(),CTASK.equalsIgnoreCase(priority)?"CH & CTASK":priority);
+            slfReportDetails.forEach(reportDetails ->{
+                Map<String, String> mapDetails = new HashMap<>();
+                mapDetails.put("inc",reportDetails.getIncidentNo());
+                mapDetails.put("notes",reportDetails.getWorkNotes());
+                mapDetails.put("date",reportDetails.getDate()+"");
+                mapDetails.put("priority",reportDetails.getPriority());
+                rowDetails.add(mapDetails);
+            });
+        } else if(tabMap.containsKey(tab)){
+            slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyResult.getFromDate(),weeklyResult.getToDate(),tabMap.get(tab));
+            slfReportDetails.forEach(reportDetails ->{
+                Map<String, String> mapDetails = new HashMap<>();
+                mapDetails.put("inc",reportDetails.getIncidentNo());
+                mapDetails.put("notes",reportDetails.getWorkNotes());
+                mapDetails.put("date",reportDetails.getDate()+"");
+                mapDetails.put("priority",reportDetails.getPriority());
+                rowDetails.add(mapDetails);
+            });
+        } else if(tabDetailsMap.containsKey(tab)){
+            slfReportDetails = fetchReportDetailsOnBasesOfDateAndConsumer(weeklyResult.getFromDate(),weeklyResult.getToDate(),priority);
+            if(tabDetailsMap.get(tab).equals(DATA_CORRECTION)){
+                slfReportDetails.stream().filter(rec ->rec.getCategorization().equals(DATA_CORRECTION) || rec.getCategorization().equals(DATA_REPUSH) || rec.getCategorization().equals(DATA_MISSING.toUpperCase())).forEach(reportDetails ->{
+                    Map<String, String> mapDetails = new HashMap<>();
+                    mapDetails.put("inc",reportDetails.getIncidentNo());
+                    mapDetails.put("notes",reportDetails.getWorkNotes());
+                    mapDetails.put("date",reportDetails.getDate()+"");
+                    mapDetails.put("priority",reportDetails.getPriority());
+                    rowDetails.add(mapDetails);
+                });
+            } else {
+                slfReportDetails.stream().filter(rec-> rec.getCategorization().equalsIgnoreCase(tabDetailsMap.get(tab))).forEach(reportDetails ->{
+                    Map<String, String> mapDetails = new HashMap<>();
+                    mapDetails.put("inc",reportDetails.getIncidentNo());
+                    mapDetails.put("notes",reportDetails.getWorkNotes());
+                    mapDetails.put("date",reportDetails.getDate()+"");
+                    mapDetails.put("priority",reportDetails.getPriority());
+                    rowDetails.add(mapDetails);
+                });
+            }
+
+        }
+
+        List<HeaderDetails> headerDetails = new ArrayList<>();
+        HeaderDetails details = new HeaderDetails();
+        details.setHeaderName("Date");
+        details.setField("date");
+        details.setFlex(1);
+        headerDetails.add(details);
+        details = new HeaderDetails();
+        details.setHeaderName("Incident No.");
+        details.setField("inc");
+        details.setFlex(1);
+        headerDetails.add(details);
+        details = new HeaderDetails();
+        details.setHeaderName("Work Notes");
+        details.setField("notes");
+        details.setTooltipField("notes");
+        details.setWidth(150);
+        details.setSuppressSizeToFit(true);
+        details.setFlex(3);
+        headerDetails.add(details);
+        details = new HeaderDetails();
+        details.setHeaderName("Priority");
+        details.setField("priority");
+        details.setFlex(1);
+        headerDetails.add(details);
+
+        Result result = new Result();
+        result.setColumnDef(headerDetails);
+        result.setRowData(rowDetails);
+        return result;
+    }
+
     public Map<String, ResponseModel> fetchResponseModels(int year){
         Map<String,ResponseModel>  responseModelMap = new LinkedHashMap<>();
         FridayAndThursdayDates.getWeeklyDays(year).forEach(weeklyDate -> {
@@ -1117,6 +1219,9 @@ class SlfReportServiceImpl implements SlfReportService {
 
         return responseModelMap;
     }
+
+
+
 
     public Long calculateIncidentNo( List<ReportDetails> sqlResult , String priority) {
 

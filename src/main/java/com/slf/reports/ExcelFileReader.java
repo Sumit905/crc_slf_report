@@ -44,6 +44,8 @@ public class ExcelFileReader {
     private static final String  PRIORITY = "PRIORITY";
     private static final String  INC_NO = "INC_NO";
 
+    private static final String  WORK_NOTES = "WORK NOTES";
+
 
 
     XSSFWorkbook fetchWorkBookReader() throws IOException {
@@ -134,6 +136,12 @@ public class ExcelFileReader {
                             case INC_NO:
                                 if (sheet.getRow(j).getCell(z) != null)
                                     details.setIncidentNo(sheet.getRow(j).getCell(z).getStringCellValue().trim());
+                                break;
+                            case WORK_NOTES:
+                                if (sheet.getRow(j).getCell(z) != null)
+                                    details.setWorkNotes(sheet.getRow(j).getCell(z).getStringCellValue().trim());
+                                else
+                                    details.setWorkNotes("");
                                 break;
 
                         }

@@ -26,7 +26,26 @@ public class ReportDetails {
 	private String priority;
 	@Lob
 	private String categorization;
+
+	@Lob
+	private String workNotes;
 	public ReportDetails() {
+	}
+
+	public ReportDetails(long reportId,
+						 String stream,
+						 LocalDate date,
+						 String incidentNo,
+						 String priority,
+						 String categorization,
+						 String workNotes) {
+		this.reportId = reportId;
+		this.stream = stream;
+		this.date = date;
+		this.incidentNo = incidentNo;
+		this.priority = priority;
+		this.categorization = categorization;
+		this.workNotes = workNotes;
 	}
 	public ReportDetails(long reportId, String stream, LocalDate date, String incidentNo, String priority,
 			String categorization) {
@@ -73,11 +92,37 @@ public class ReportDetails {
 	public void setCategorization(String categorization) {
 		this.categorization = categorization;
 	}
-	
-	@Override
-	public String toString() {
-		return "ReportDetails [reportId=" + reportId + ", stream=" + stream + ", date=" + date + ", incidentNo="
-				+ incidentNo + ", priority=" + priority + ", categorization=" + categorization + "]";
+
+	public String getWorkNotes() {
+		return workNotes;
 	}
 
+	public void setWorkNotes(String workNotes) {
+		this.workNotes = workNotes;
+	}
+
+	@Override
+	public String toString() {
+		return "ReportDetails{"
+			   + "reportId="
+			   + reportId
+			   + ", stream='"
+			   + stream
+			   + '\''
+			   + ", date="
+			   + date
+			   + ", incidentNo='"
+			   + incidentNo
+			   + '\''
+			   + ", priority='"
+			   + priority
+			   + '\''
+			   + ", categorization='"
+			   + categorization
+			   + '\''
+			   + ", workNotes='"
+			   + workNotes
+			   + '\''
+			   + '}';
+	}
 }

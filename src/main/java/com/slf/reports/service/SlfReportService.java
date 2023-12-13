@@ -51,6 +51,8 @@ public interface SlfReportService {
 	Result fetchDateClarificationDetails(int year);
 	Result fetchDateCorrectionDetails(int year);
 
+	Result fetchDetailsOfInc(String tab,String priority, String columnId, int year);
+
 	Map<String, ResponseModel> fetchResponseModels(int year);
 
 

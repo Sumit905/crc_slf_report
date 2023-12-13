@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FridayAndThursdayDates {
 
@@ -15,14 +16,13 @@ public class FridayAndThursdayDates {
         LocalDate currentDate = LocalDate.now();
         LocalDate friday = LocalDate.of(year, 1, 1)
                                     .with(TemporalAdjusters.firstInMonth(DayOfWeek.FRIDAY));
+        AtomicInteger i = new AtomicInteger();
         while (friday.getYear() == year && friday.compareTo(currentDate)<=0) {
             WeeklyRequestParam weeklyRequestParam = new WeeklyRequestParam();
-            //System.out.println("Friday in " + friday.getYear() + ": " + friday);
-            // Find the year and date of the coming week's Thursday
             LocalDate nextThursday = friday.with(TemporalAdjusters.next(DayOfWeek.THURSDAY));
-           // System.out.println("Thursday in " + friday.getYear() + ": " + nextThursday);
             weeklyRequestParam.setFromDate(friday);
             weeklyRequestParam.setToDate(nextThursday);
+            weeklyRequestParam.setWeeklyId("W"+i.incrementAndGet());
             weeklyDays.add(weeklyRequestParam);
             friday = friday.plusWeeks(1);
         }

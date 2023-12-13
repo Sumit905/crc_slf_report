@@ -23,6 +23,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@30.0.5/dist/ag-grid-community.min.js">
     </script>
+    <script type="text/javascript" src="linkRenderer.js"></script>
     <script type="text/javascript" src="SlfReport.js"></script>
 
 
@@ -116,7 +117,25 @@
         </div>
 </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalTable" style="height: 330px; width:98%;" class="ag-theme-alpine card-body">
 
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 

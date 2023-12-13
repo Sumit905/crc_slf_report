@@ -13,6 +13,51 @@ $(document)
 		.ready(
 				function() {
 
+
+				const myModalEl = document.getElementById('exampleModal')
+				const myGridElement = document.querySelector('#modalTable');
+				const modalAgGridOptions = {};
+                let modalAgGridTable = new agGrid.Grid(myGridElement, modalAgGridOptions);
+                var tabIndex =[{id:'v-pills-inc-tab',tab:'total-incident'},
+                    {id:'v-pills-task-tab',tab:'task-details'},
+                    {id:'v-pills-open-shift-tab',tab:'openshift-details'},
+                    {id:'v-pills-landing-tab',tab:'landing-details'},
+                    {id:'v-pills-batches-tab',tab:'batch-details'},
+                    {id:'v-pills-idrs-tab',tab:'idrs-details'},
+                    {id:'v-pills-data-clarification-tab',tab:'data-clarification-details'},
+                    {id:'v-pills-data-correction-tab',tab:'data-correction-details'}]
+                    myModalEl.addEventListener('show.bs.modal', event => {
+                     // do something...
+                     var selText = $("#dropdownMenuButton1").text().trim();
+                     var columnId = $(event.relatedTarget).data('column-id');
+                     var priority = $(event.relatedTarget).data('priority');
+                     var columnValue = $(event.relatedTarget).data('column-value');
+                     var tab = tabIndex.find(rec => rec.id== $("#v-pills-tab .nav-link.active")[0].id).tab;
+                    var modalTitle = myModalEl.querySelector('.modal-title')
+                    var modalBodyInput = myModalEl.querySelector('.modal-body input')
+                     modalTitle.textContent = priority+" ( " + columnValue +" )";
+
+                     $.ajax({
+                            url : "../slfReport/"+tab+"/"+priority+"/"+columnId+"/"+selText,
+                            type : 'Post',
+                            success : function(result) {
+                                   var data = eval(result);
+                                   modalAgGridTable.gridOptions.api.setColumnDefs(data.columnDef);
+                                   modalAgGridTable.gridOptions.api.setRowData(data.rowData);
+                                   modalAgGridTable.gridOptions.api.setAutoSizeStrategy({
+                                                                                      type: 'fitGridWidth',
+                                                                                      defaultMinWidth: 100,
+                                                                                      columnLimits: [
+                                                                                        {
+                                                                                          colId: 'notes',
+                                                                                          minWidth: 200,
+                                                                                        },
+                                                                                      ],
+                                                                                    });
+
+                            }
+                        });
+                   });
                     const tablesList = [
                     {
                         tableId: 'totalNoOfInident',
@@ -297,6 +342,7 @@ $(document)
                                    type : 'Post',
                                    success : function(result) {
                                           var data = eval(result);
+                                          data.columnDef.forEach(params => params.cellRenderer= LinkRenderer);
                                           rec.gridOpt.gridOptions.api.setColumnDefs(data.columnDef);
                                           rec.gridOpt.gridOptions.api.setRowData(data.rowData);
                                           calcTotalCols=data.columnDef;

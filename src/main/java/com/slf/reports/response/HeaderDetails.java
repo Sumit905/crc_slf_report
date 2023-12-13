@@ -7,6 +7,17 @@ public class HeaderDetails {
 
     private String pinned;
 
+    private String tooltipField;
+
+    private Integer width;
+
+    private boolean suppressSizeToFit;
+
+    private Integer maxWidth;
+
+    private Integer flex;
+
+
     public String getHeaderName() {
         return headerName;
     }
@@ -29,5 +40,45 @@ public class HeaderDetails {
 
     public void setPinned(String pinned) {
         this.pinned = pinned;
+    }
+
+    public String getTooltipField() {
+        return tooltipField;
+    }
+
+    public void setTooltipField(String tooltipField) {
+        this.tooltipField = tooltipField;
+    }
+
+    public Integer getWidth() {
+        return width;
+    }
+
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    public boolean isSuppressSizeToFit() {
+        return suppressSizeToFit;
+    }
+
+    public void setSuppressSizeToFit(boolean suppressSizeToFit) {
+        this.suppressSizeToFit = suppressSizeToFit;
+    }
+
+    public Integer getMaxWidth() {
+        return maxWidth;
+    }
+
+    public void setMaxWidth(Integer maxWidth) {
+        this.maxWidth = maxWidth;
+    }
+
+    public Integer getFlex() {
+        return flex;
+    }
+
+    public void setFlex(Integer flex) {
+        this.flex = flex;
     }
 }
