@@ -21,7 +21,6 @@ $(document)
                 var tabIndex =[{id:'v-pills-inc-tab',tab:'total-incident'},
                     {id:'v-pills-task-tab',tab:'task-details'},
                     {id:'v-pills-open-shift-tab',tab:'openshift-details'},
-                    {id:'v-pills-landing-tab',tab:'landing-details'},
                     {id:'v-pills-batches-tab',tab:'batch-details'},
                     {id:'v-pills-idrs-tab',tab:'idrs-details'},
                     {id:'v-pills-data-clarification-tab',tab:'data-clarification-details'},
@@ -68,9 +67,6 @@ $(document)
                     },{
                         tableId: 'openShiftIncident',
                         tableUrl: '../slfReport/openshift-details/'
-                    },{
-                        tableId: 'landingIncident',
-                        tableUrl: '../slfReport/landing-details/'
                     },{
                         tableId: 'batchesIncident',
                         tableUrl: '../slfReport/batch-details/'
@@ -212,37 +208,7 @@ $(document)
                                     }
                                 });
                                 break;
-                               }
-                               case "v-pills-landing-tab":
-                               {
-                                    $.ajax({
-                                        url : "../slfReport/landing-details/chart/"+selText,
-                                        type : 'Post',
-                                        contentType : "application/json; charset=utf-8",
-                                        success : function(result) {
-                                            var chart = new CanvasJS.Chart("landingIncidentChart", {
-                                                animationEnabled : true,
-                                                title : {
-                                                    text : "Landing Incidents"  
-                                                },
-                                                axisY : {
-                                                    title : "Number Of Incidents"
-                                                },
-                                                axisX: {
-                                                    interval: 1
-                                                },
-                                                toolTip : {
-                                                    shared : true,
-                                                    reversed : true
-                                                },
-                                                data : eval(result)
-                                            });
-
-                                            chart.render();
-                                        }
-                                    });
-                                   break;
-                               }
+                               }                               
                                case "v-pills-batches-tab":
                               {
                                 $.ajax({
