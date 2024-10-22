@@ -18,4 +18,6 @@ public interface SlfReportRepository extends CrudRepository<ReportDetails, Long>
 			@Param("endDate") LocalDate endDate, @Param("consumer") String consumer);
 	
 	ReportDetails findByIncidentNo(String incidentNo);
+
+	List<ReportDetails> findAllByDateBetweenAndCategorization(LocalDate startDate, LocalDate endDate,String categorization);
 }

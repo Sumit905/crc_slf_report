@@ -56,4 +56,9 @@ public interface SlfReportService {
 	Map<String, ResponseModel> fetchResponseModels(int year);
 
 
+	List<StackedColumnModel> fetchDetailsOfIncident(LocalDate fromYear,LocalDate toYear);
+
+	Result fetchMonthlyDetails(LocalDate fromYear,LocalDate toYear);
+
+
 }

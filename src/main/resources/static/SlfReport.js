@@ -13,9 +13,127 @@ $(document)
 		.ready(
 				function() {
 
+    		$('.header > div > a').click(function(event){
+    		event.preventDefault();//stop browser to take action for clicked anchor
 
-				const myModalEl = document.getElementById('exampleModal')
+    		//get displaying tab content jQuery selector
+    		var active_tab_selector = $('.header > div > a.active').attr('href');
+
+    		//find actived navigation and remove 'active' css
+    		var actived_nav = $('.header > div > a.active');
+    		actived_nav.removeClass('active');
+
+    		//add 'active' css into clicked navigation
+    		$(this).addClass('active');
+
+
+    		//hide displaying tab content
+    		$(active_tab_selector).removeClass('active');
+    		$(active_tab_selector).addClass('hide');
+
+    		//show target tab content
+    		var target_tab_selector = $(this).attr('href');
+    		$(target_tab_selector).removeClass('hide');
+    		$(target_tab_selector).addClass('active');
+    	     });
+
+
+
+
+ var calcTotalCols = [];
+  let monthlyDivId = document.querySelector('#dataMonthlyReport');
+                                let monthlyIncidentAgGrid = new agGrid.Grid(monthlyDivId, {
+                                                                         animateRows: true,
+                                                                         columnDefs: [],
+                                                                         rowData: []
+                                                                   });
+
+				$("#from").datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        changeMonth: true,
+                        changeYear: true,
+                        changeDate:true,
+                        showButtonPanel: true,
+                        beforeShow: function(input, inst) {
+                            if (!$(this).val()) {
+                                //$(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1)).trigger('change');
+                            }
+                        },
+                        onClose: function(dateText, inst) {
+                            $("#to").datepicker("option", {minDate: new Date(inst.selectedYear, inst.selectedMonth, 1)})
+                        }
+                    });
+                    $('#from').datepicker('setDate', new Date());
+                    $('#to').datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        changeMonth: true,
+                        changeYear: true,
+                        changeDate:true,
+                        showButtonPanel: true,
+                        onClose: function(dateText, inst) {
+                           // $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1)).trigger('change');
+                        }
+                    });
+
+                    $("#btnShow").click(function() {
+                        if ($("#from").val().length == 0 || $("#to").val().length == 0) {
+                            alert('All fields are required');
+                        } else {
+                            var startDay = $("#from").val();
+                            var endDay = $("#to").val();
+
+                            $.ajax({
+                                url : "../slfReport/monthly?fromDate="+startDay+"&toDate="+endDay,
+                                type : 'Post',
+                                success : function(result) {
+                                       var data = eval(result);
+                                      var chart = new CanvasJS.Chart("monthlyReportChart", {
+                                              animationEnabled : true,
+                                              indexLabel: "Total: {y}",
+                                              title : {
+                                                  text : "Total Number of Incidents"
+                                              },
+                                              axisY : {
+                                                  title : "Number Of Incidents"
+                                              },
+                                              axisX: {
+                                                  interval: 1
+                                              },
+                                              toolTip : {
+                                                  shared : true,
+                                                  reversed : true
+                                              },
+                                              data : eval(result)
+                                          });
+
+                                          chart.render();
+
+                                }
+                            });
+
+
+                             $.ajax({
+                                   url : '../slfReport/data/monthly-details?fromDate='+$("#from").val()+"&toDate="+$("#to").val(),
+                                   type : 'Post',
+                                   success : function(result) {
+                                          var data = eval(result);
+                                          data.columnDef.forEach(params => params.cellRenderer= LinkRenderer);
+                                         monthlyIncidentAgGrid.gridOptions.api.setColumnDefs(data.columnDef);
+                                         monthlyIncidentAgGrid.gridOptions.api.setRowData(data.rowData);
+                                          calcTotalCols=data.columnDef;
+                                          totalRow(monthlyIncidentAgGrid.gridOptions.api,data.rowData);
+                                   }
+                               });
+
+                        }
+                    });
+
+
+				const myModalEl = document.getElementById('exampleModal');
+				const mySubmitFormFileEl = document.getElementById('submitFormFile');
 				const myGridElement = document.querySelector('#modalTable');
+				const myAlert = document.querySelector('#alert');
+				const mySpinnerId = document.querySelector('#spinnerId');
 				const modalAgGridOptions = {};
                 let modalAgGridTable = new agGrid.Grid(myGridElement, modalAgGridOptions);
                 var tabIndex =[{id:'v-pills-inc-tab',tab:'total-incident'},
@@ -25,9 +143,29 @@ $(document)
                     {id:'v-pills-idrs-tab',tab:'idrs-details'},
                     {id:'v-pills-data-clarification-tab',tab:'data-clarification-details'},
                     {id:'v-pills-data-correction-tab',tab:'data-correction-details'}]
+
+                    mySubmitFormFileEl.addEventListener('click', event => {
+                        var formData = new FormData();
+                        formData.append('file', $('#formFile')[0].files[0]);
+                        $.ajax({
+                                url : "../excel",
+                                type : 'Post',
+                                processData: false,
+                                contentType: false,
+                                cache: false,
+                                data: formData,
+                                success : function(result) {
+                                myAlert.innerHTML('<div class="alert alert-warning alert-dismissible fade show" role="alert">'+
+                                       result+
+                                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>'+
+                                        '</button></div>');
+                                }
+                            });
+
+                    });
                     myModalEl.addEventListener('show.bs.modal', event => {
                      // do something...
-                     var selText = $("#dropdownMenuButton1").text().trim();
+                     var selText = $("#dropdownMenuButton1 > label.btn.active").text().trim();
                      var columnId = $(event.relatedTarget).data('column-id');
                      var priority = $(event.relatedTarget).data('priority');
                      var columnValue = $(event.relatedTarget).data('column-value');
@@ -79,7 +217,7 @@ $(document)
                     },{
                         tableId: 'dataCorrectionIncident',
                         tableUrl: '../slfReport/data/correction-details/'
-                    }]
+                     }]
                       const gridOptions = [];
                       for (let i of tablesList) {
                            let divId = document.querySelector('#'+i.tableId);
@@ -93,7 +231,7 @@ $(document)
                             gridUrl:i.tableUrl
                           });
                       }
-                       var calcTotalCols = [];
+
 
                         const totalRow = function(api,rowData) {
                             let result = [{}];
@@ -119,7 +257,7 @@ $(document)
 
                     $('#v-pills-tab a').on('click', function (e) {
                                       e.preventDefault()
-                          var selText = $(this).parents('.container-fluid').find('#dropdownMenuButton1').text().trim();
+                          var selText = $(this).parents('.container-fluid').find("#dropdownMenuButton1 > label.btn.active").text().trim();
                           switch(this.id){
                                 case "v-pills-inc-tab":{
                                     $.ajax({
@@ -273,9 +411,10 @@ $(document)
                           }
                           $(this).tab('show');
                     });
-                   $(".dropdown-menu li a").click(function(){
+                   $("label.btn").click(function(){
+                     $("#dropdownMenuButton1 > label.btn").removeClass('active');
+                     $(this).addClass('active')
                      var selText = $(this).text();
-                     $(this).parents('.dropdown').find('#dropdownMenuButton1').html(selText+' <span class="caret"></span>');
                       $.ajax({
                          url : "../slfReport/total-incident/chart/"+selText,
                          type : 'Post',
@@ -304,7 +443,7 @@ $(document)
                      });
                         for(let rec of gridOptions){
                              $.ajax({
-                                   url : rec.gridUrl+selText,
+                                   url : rec.gridUrl=='../slfReport/data/monthly-details'? rec.gridUrl+"?fromDate="+$("#from").val()+"&toDate="+$("#to").val() :rec.gridUrl+selText,
                                    type : 'Post',
                                    success : function(result) {
                                           var data = eval(result);
@@ -319,4 +458,38 @@ $(document)
 
 
                    });
+
+                   $("#exportButton").click(function(e){
+                        for(let rec of gridOptions){
+                             e.preventDefault();
+                             exportToPDF(rec.gridOpt,"Test");
+                        }
+                   });
+
        });
+
+
+
+//Create PDf from HTML...
+function CreatePDFfromHTML() {
+    var HTML_Width = $("#v-pills-tabContent").width();
+        var HTML_Height = $("#v-pills-tabContent").height();
+        var top_left_margin = 15;
+        var PDF_Width = HTML_Width + (top_left_margin * 2);
+        var PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+        var canvas_image_width = HTML_Width;
+        var canvas_image_height = HTML_Height;
+
+        var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+        html2canvas($("#v-pills-tabContent")[0]).then(function (canvas) {
+            var imgData = canvas.toDataURL("image/jpeg", 1.0);
+            var pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+            pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+            for (var i = 1; i <= totalPDFPages; i++) {
+                pdf.addPage(PDF_Width, PDF_Height);
+                pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+            }
+            pdf.save("Your_PDF_Name.pdf");
+        });
+}

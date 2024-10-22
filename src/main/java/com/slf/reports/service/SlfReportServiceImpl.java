@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import com.slf.reports.entity.ReportDetails;
 import com.slf.reports.repository.SlfReportRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.slf.reports.utils.ConstantUtil.BASELOADED_AGREEMENTS_FOR_RIX;
@@ -86,7 +87,9 @@ class SlfReportServiceImpl implements SlfReportService {
             sheetNameEntityObj.setStream(sheetName);
             // Not Save the duplicate Sheet Name In DB.
             try{
-                sheetNamesRepository.save(sheetNameEntityObj);
+                if(ObjectUtils.isEmpty(sheetNamesRepository.findByStream(sheetName))){
+                    sheetNamesRepository.save(sheetNameEntityObj);
+                }
             }catch(Exception ex){
                 System.out.println(Arrays.toString(ex.getStackTrace()));
             }
@@ -1218,6 +1221,225 @@ class SlfReportServiceImpl implements SlfReportService {
         });
 
         return responseModelMap;
+    }
+
+    public List<StackedColumnModel> fetchDetailsOfIncident(LocalDate fromDate,LocalDate toDate){
+        List<String> sheetNames = fetchSheetNames().stream().map(SheetNameEntity::getStream).collect(Collectors.toList());
+        List<StackedColumnModel> data = new ArrayList<>();
+        StackedColumnModel ctaskStackedColumnModel = new StackedColumnModel();
+        ctaskStackedColumnModel.setType(STACKED_COLUMN);
+        ctaskStackedColumnModel.setName(CTASK);
+        ctaskStackedColumnModel.setShowInLegend("true");
+        ctaskStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel sctaskStackedColumnModel = new StackedColumnModel();
+        sctaskStackedColumnModel.setType(STACKED_COLUMN);
+        sctaskStackedColumnModel.setName(SCTASK);
+        sctaskStackedColumnModel.setShowInLegend("true");
+        sctaskStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel ptaskStackedColumnModel = new StackedColumnModel();
+        ptaskStackedColumnModel.setType(STACKED_COLUMN);
+        ptaskStackedColumnModel.setName(PTASK);
+        ptaskStackedColumnModel.setShowInLegend("true");
+        ptaskStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel ritmStackedColumnModel = new StackedColumnModel();
+        ritmStackedColumnModel.setType(STACKED_COLUMN);
+        ritmStackedColumnModel.setName(RITM);
+        ritmStackedColumnModel.setShowInLegend("true");
+        ritmStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel prbStackedColumnModel = new StackedColumnModel();
+        prbStackedColumnModel.setType(STACKED_COLUMN);
+        prbStackedColumnModel.setName(PRB);
+        prbStackedColumnModel.setShowInLegend("true");
+        prbStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel dataCorrectionStackedColumnModel = new StackedColumnModel();
+        dataCorrectionStackedColumnModel.setType(STACKED_COLUMN);
+        dataCorrectionStackedColumnModel.setName("Data Correction");
+        dataCorrectionStackedColumnModel.setShowInLegend("true");
+        dataCorrectionStackedColumnModel.setyValueFormatString("## Inc");
+
+        StackedColumnModel dataClarificationStackedColumnModel = new StackedColumnModel();
+        dataClarificationStackedColumnModel.setType(STACKED_COLUMN);
+        dataClarificationStackedColumnModel.setName("Data Clarification");
+        dataClarificationStackedColumnModel.setShowInLegend("true");
+        dataClarificationStackedColumnModel.setyValueFormatString("##  Inc");
+
+        List<DataPointsModel> ctaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> sctaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> ptaskDataPoint = new ArrayList<>();
+        List<DataPointsModel> ritmDataPoint = new ArrayList<>();
+        List<DataPointsModel> prbDataPoint = new ArrayList<>();
+        List<DataPointsModel> dataCorrectionPoint = new ArrayList<>();
+        List<DataPointsModel> dataClarificationPoint = new ArrayList<>();
+
+
+        int i=1;
+        LocalDate tempDate = null;
+
+
+        while(!fromDate.isEqual(toDate)){
+            tempDate =fromDate;
+            fromDate = fromDate.plusMonths(i);
+            if(fromDate.isAfter(toDate)){
+                fromDate = toDate;
+            }
+
+
+            DataPointsModel dataPointsModel = new DataPointsModel();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(tempDate, fromDate);
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals("CH & CTASK".toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            ctaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(SCTASK.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            sctaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(PTASK.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            ptaskDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(RITM.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            ritmDataPoint.add(dataPointsModel);
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(slfReportDetails.stream()
+                                                 .filter(obj -> obj.getStream().equals(PRB.toUpperCase()))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            prbDataPoint.add(dataPointsModel);
+
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(fetchReportDetailsOnBasesOfDate(tempDate,fromDate).stream()
+                                                 .filter(obj -> obj.getCategorization()
+                                                                   .equals(DATA_CORRECTION) || obj.getCategorization()
+                                                                                                  .equals(DATA_REPUSH) || obj.getCategorization()
+                                                                                                                             .equals(DATA_MISSING))
+                                                 .count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            dataCorrectionPoint.add(dataPointsModel);
+
+            dataPointsModel = new DataPointsModel();
+            dataPointsModel.setY(reportRepository.findAllByDateBetweenAndCategorization(tempDate,fromDate,DATA_CLARIFICATION).stream().count());
+            dataPointsModel.setLabel(tempDate.getMonth()+"-"+tempDate.getYear());
+            dataClarificationPoint.add(dataPointsModel);
+        }
+
+
+        ptaskStackedColumnModel.setDataPoints(ptaskDataPoint);
+        ritmStackedColumnModel.setDataPoints(ritmDataPoint);
+        dataCorrectionStackedColumnModel.setDataPoints(dataCorrectionPoint);
+        dataClarificationStackedColumnModel.setDataPoints(dataClarificationPoint);
+
+
+        data.add(dataCorrectionStackedColumnModel);
+        data.add(dataClarificationStackedColumnModel);
+        data.add(ptaskStackedColumnModel);
+        data.add(ritmStackedColumnModel);
+        data.add(prbStackedColumnModel);
+        return data;
+    }
+
+    public Result fetchMonthlyDetails(LocalDate fromDate,LocalDate toDate){
+        List<HeaderDetails> headerDetails = new ArrayList<>();
+        HeaderDetails headerDetail = new HeaderDetails();
+        headerDetail.setHeaderName("Types");
+        headerDetail.setField(PRIORITY);
+        headerDetail.setPinned(LEFT);
+        headerDetails.add(headerDetail);
+
+        LocalDate tempDate = null;
+        AtomicInteger i = new AtomicInteger();
+        List<Map<String, String>> rowDetails = new ArrayList<>();
+        Map<String,String> ctaskData= new HashMap<>();
+        Map<String,String> sctaskData= new HashMap<>();
+        Map<String,String> ptaskData= new HashMap<>();
+        Map<String,String> ritmData= new HashMap<>();
+        Map<String,String> prbData= new HashMap<>();
+        Map<String,String> clarificationData= new HashMap<>();
+        Map<String,String> correctionData= new HashMap<>();
+
+        ptaskData.put(PRIORITY,PTASK);
+        ritmData.put(PRIORITY,RITM);
+        correctionData.put(PRIORITY,DATA_CORRECTION);
+        clarificationData.put(PRIORITY,DATA_CLARIFICATION);
+
+
+        while(!fromDate.isEqual(toDate)){
+            tempDate =fromDate;
+            fromDate = fromDate.plusMonths(1);
+            if(fromDate.isAfter(toDate)){
+                fromDate = toDate;
+            }
+            HeaderDetails details = new HeaderDetails();
+            List<ReportDetails> slfReportDetails = fetchReportDetailsOnBasesOfDate(tempDate, fromDate);
+
+            String index = "W" + (i.incrementAndGet());
+            Map<String,String> taskIncident = new HashMap<>();
+            ctaskData.put(index,String.valueOf(slfReportDetails.stream().filter(rec -> rec.getStream().equals("CH & CTASK")).count()));
+
+            sctaskData.put(index,String.valueOf(slfReportDetails.stream().filter(rec -> rec.getStream().equals(SCTASK)).count()));
+            ptaskData.put(index,String.valueOf(slfReportDetails.stream().filter(rec -> rec.getStream().equals(PTASK)).count()));
+            ritmData.put(index,String.valueOf(slfReportDetails.stream().filter(rec -> rec.getStream().equals(RITM)).count()));
+            prbData.put(index,String.valueOf(slfReportDetails.stream().filter(rec -> rec.getStream().equals(PRB)).count()));
+            correctionData.put(index,String.valueOf(slfReportDetails.stream().filter(obj -> obj.getCategorization().equals(DATA_CORRECTION) || obj.getCategorization()
+                                                                         .equals(DATA_REPUSH) || obj.getCategorization()
+                                                                                                    .equals(DATA_MISSING)).count()));
+            clarificationData.put(index,String.valueOf(reportRepository.findAllByDateBetweenAndCategorization(tempDate,fromDate,DATA_CLARIFICATION).stream().count()));
+
+
+            details.setHeaderName(tempDate.getMonth()+"-"+tempDate.getYear());
+            details.setField(index);
+            headerDetails.add(details);
+        };
+        rowDetails.add(ptaskData);
+        rowDetails.add(ritmData);
+        rowDetails.add(correctionData);
+        rowDetails.add(clarificationData);
+
+        Result result = new Result();
+        result.setColumnDef(headerDetails);
+        result.setRowData(rowDetails);
+        return result;
+
+
+
+
+
+//        List<WeeklyRequestParam> weeklyRequestParams = FridayAndThursdayDates.getWeeklyDays(year);
+//        List<Map<String, String>> rowDetails = new ArrayList<>();
+//        List<String> sheetNames = fetchSheetNamesWithTask();
+//        for(String sheetName : sheetNames){
+//            Map<String, String> consumerMap = new HashMap<>();
+//            consumerMap.put(PRIORITY, sheetName);
+//            AtomicInteger i = new AtomicInteger();
+//            weeklyRequestParams.forEach(rec -> {
+//                List<ReportDetails> slfReportDetails =
+//                        fetchReportDetailsOnBasesOfDateAndConsumer(rec.getFromDate(), rec.getToDate(), sheetName);
+//                consumerMap.put("W" + i.incrementAndGet(),
+//                                String.valueOf(slfReportDetails.stream()
+//                                                               .filter(obj -> obj.getCategorization()
+//                                                                                 .equals(DATA_CORRECTION) || obj.getCategorization()
+//                                                                                                                .equals(DATA_REPUSH) || obj.getCategorization()
+//                                                                                                                                           .equals(DATA_MISSING))
+//                                                               .count()));
+//            });
+//            rowDetails.add(consumerMap);
+//        }
+
+
     }
 
 

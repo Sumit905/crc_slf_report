@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <style>
 .badge{
@@ -7,6 +7,66 @@
     right:0;
     margin: 0 5px;
 }
+/* Style the header with a grey background and some padding */
+.header {
+  overflow: hidden;
+  background-color: #f1f1f1;
+  padding: 20px 10px;
+}
+
+/* Style the header links */
+.header a {
+  float: left;
+  color: black;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+/* Style the logo link (notice that we set the same value of line-height and font-size to prevent the header to increase when the font gets bigger */
+.header a.logo {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+/* Change the background color on mouse-over */
+.header a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Style the active/current link*/
+.header a.active {
+  background-color: dodgerblue;
+  color: white;
+}
+
+/* Float the link section to the right */
+.header-right {
+  float: right;
+}
+
+/* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
+@media screen and (max-width: 500px) {
+  .header a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+  .header-right {
+    float: none;
+  }
+}
+			.tab-content.active{
+				display: block;
+			}
+
+			.tab-content.hide{
+				display: none;
+			}
 
 
 
@@ -20,115 +80,159 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="https://cdn.canvasjs.com/jquery.canvasjs.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@30.0.5/dist/ag-grid-community.min.js">
-    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://superal.github.io/canvas2image/canvas2image.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js" rel="stylesheet" ></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js" rel="stylesheet" ></script>
+    <script src="html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@30.0.5/dist/ag-grid-community.min.js"></script>
     <script type="text/javascript" src="linkRenderer.js"></script>
     <script type="text/javascript" src="SlfReport.js"></script>
+    <script type="text/javascript" src="gridExporter.js"></script>
 
 
 </head>
 <body>
+<div class="header">
+    <a href="#default" class="logo">SLF Report</a>
+    <div class="header-right">
+        <a href="#daily">Import Excel File</a>
+        <a class="active" href="#weekly">Weekly</a>
+       <a href="#monthly">Monthly</a>
+    </div>
+</div>
+
 
 
 <div class="container-fluid" >
-
-
-
-<div class="row justify-content-between align-items-center mb-5">
-    <div class="col flex-shrink-0 mb-5 mb-md-0">
-        <h3 class="display-5 mb-0">SLF Report</h3>
-    </div>
-    <div class="col-12 col-md-auto">
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                Years
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#">2022</a></li>
-                <li><a class="dropdown-item" href="#">2023</a></li>
-                <li><a class="dropdown-item" href="#">2024</a></li>
-            </ul>
+    <section id="weekly" class="tab-content active">
+    <div class="row">
+        <div class="align-self-center">
+            <div id="dropdownMenuButton1" style="display: contents;margin: 3px;">
+                <input type="radio" class="btn-check" name="options" id="option1" autocomplete="off">
+                <label class="btn btn-primary" for="option1">2022</label>
+                <input type="radio" class="btn-check" name="options" id="option2" autocomplete="off">
+                <label class="btn btn-primary" for="option2">2023</label>
+                <input type="radio" class="btn-check" name="options" id="option3" autocomplete="off">
+                <label class="btn btn-primary" for="option3">2024</label>
+            </div>
+            <div class="align-self-center" style="float: inline-end;margin: 3px;">
+                <input type="button" class="btn btn-primary" name="pdfButton" id="exportButton" value="Export Pdf" autocomplete="off">
+            </div>
         </div>
-    </div>
-</div>
-    <nav>
-        <div class="nav nav-tabs" id="v-pills-tab" role="tablist">
-            <a class="nav-link active" id="v-pills-inc-tab" data-toggle="pill" href="#v-pills-inc" role="tab" aria-controls="v-pills-inc" aria-selected="true">Total Number Incidents</a>
-            <a class="nav-link" id="v-pills-task-tab" data-toggle="pill" href="#v-pills-task" role="tab" aria-controls="v-pills-task" aria-selected="false">Task Incidents</a>
-            <a class="nav-link" id="v-pills-open-shift-tab" data-toggle="pill" href="#v-pills-open-shift" role="tab" aria-controls="v-pills-open-shift" aria-selected="false">Open-Shift Incidents</a>            
-            <a class="nav-link" id="v-pills-batches-tab" data-toggle="pill" href="#v-pills-batches" role="tab" aria-controls="v-pills-batches" aria-selected="false">Batches Incidents</a>
-            <a class="nav-link" id="v-pills-idrs-tab" data-toggle="pill" href="#v-pills-idrs" role="tab" aria-controls="v-pills-idrs" aria-selected="false">IDRS Incidents</a>
-            <a class="nav-link" id="v-pills-data-clarification-tab" data-toggle="pill" href="#v-pills-data-clarification" role="tab" aria-controls="v-pills-data-clarification" aria-selected="false">Data Clarification Incidents</a>
-            <a class="nav-link" id="v-pills-data-correction-tab" data-toggle="pill" href="#v-pills-data-correction" role="tab" aria-controls="v-pills-data-correction" aria-selected="false">Data Correction Incidents</a>
-        </div>
-    </nav>
-<div class="row">
-        <div class="tab-content" id="v-pills-tabContent">
-            <div class="tab-pane fade show active" id="v-pills-inc" role="tabpanel" aria-labelledby="v-pills-inc-tab">
-                <div id="totalNoOfInidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div id="totalNoOfInident" style="height: 330px; width:98%;" class="ag-theme-alpine card-body"></div>
+        <nav>
+            <div class="nav nav-tabs" id="v-pills-tab" role="tablist">
+                <a class="nav-link active" id="v-pills-inc-tab" data-toggle="pill" href="#v-pills-inc" role="tab" aria-controls="v-pills-inc" aria-selected="true">Total Number Incidents</a>
+                <a class="nav-link" id="v-pills-task-tab" data-toggle="pill" href="#v-pills-task" role="tab" aria-controls="v-pills-task" aria-selected="false">Task Incidents</a>
+                <a class="nav-link" id="v-pills-open-shift-tab" data-toggle="pill" href="#v-pills-open-shift" role="tab" aria-controls="v-pills-open-shift" aria-selected="false">Open-Shift Incidents</a>
+                <a class="nav-link" id="v-pills-batches-tab" data-toggle="pill" href="#v-pills-batches" role="tab" aria-controls="v-pills-batches" aria-selected="false">Batches Incidents</a>
+                <a class="nav-link" id="v-pills-idrs-tab" data-toggle="pill" href="#v-pills-idrs" role="tab" aria-controls="v-pills-idrs" aria-selected="false">IDRS Incidents</a>
+                <a class="nav-link" id="v-pills-data-clarification-tab" data-toggle="pill" href="#v-pills-data-clarification" role="tab" aria-controls="v-pills-data-clarification" aria-selected="false">Data Clarification Incidents</a>
+                <a class="nav-link" id="v-pills-data-correction-tab" data-toggle="pill" href="#v-pills-data-correction" role="tab" aria-controls="v-pills-data-correction" aria-selected="false">Data Correction Incidents</a>
             </div>
-            <div class="tab-pane fade" id="v-pills-task" role="tabpanel" aria-labelledby="v-pills-task-tab">
-                <div id="taskIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div style="height: 330px; width:98%;" class="ag-theme-alpine card-body" id="taskIncident"></div>
-            </div>
-            <div class="tab-pane fade" id="v-pills-open-shift" role="tabpanel" aria-labelledby="v-pills-open-shift-tab">
-                <div id="openShiftIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div id="openShiftIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
-            </div>
-            <div class="tab-pane fade" id="v-pills-landing" role="tabpanel" aria-labelledby="v-pills-landing-tab">
-                <div id="landingIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div id="landingIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
-            </div>
-            <div class="tab-pane fade" id="v-pills-batches" role="tabpanel" aria-labelledby="v-pills-batches-tab">
-                <div id="batchesIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div id="batchesIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
-            </div>
-            <div class="tab-pane fade" id="v-pills-idrs" role="tabpanel" aria-labelledby="v-pills-idrs-tab">
-                <div id="idrsIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
-                <div id="idrsIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
-            </div>
-            <div class="tab-pane fade" id="v-pills-data-clarification" role="tabpanel" aria-labelledby="v-pills-data-clarification-tab">
-                <div class="container">
-                    <div class="card">
-                        <div class="card-header">Data Clarification Incidents</div>
-                        <div id="dataClarificationIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
+        </nav>
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-inc" role="tabpanel" aria-labelledby="v-pills-inc-tab">
+                    <div id="totalNoOfInidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div id="totalNoOfInident" style="height: 330px; width:98%;" class="ag-theme-alpine card-body"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-task" role="tabpanel" aria-labelledby="v-pills-task-tab">
+                    <div id="taskIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div style="height: 330px; width:98%;" class="ag-theme-alpine card-body" id="taskIncident"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-open-shift" role="tabpanel" aria-labelledby="v-pills-open-shift-tab">
+                    <div id="openShiftIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div id="openShiftIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-landing" role="tabpanel" aria-labelledby="v-pills-landing-tab">
+                    <div id="landingIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div id="landingIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-batches" role="tabpanel" aria-labelledby="v-pills-batches-tab">
+                    <div id="batchesIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div id="batchesIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-idrs" role="tabpanel" aria-labelledby="v-pills-idrs-tab">
+                    <div id="idrsIncidentChart" style="margin:5px;height: 300px; width: 98%"></div>
+                    <div id="idrsIncident" style="height: 330px; width:100%;" class="ag-theme-alpine card-body"></div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-data-clarification" role="tabpanel" aria-labelledby="v-pills-data-clarification-tab">
+                    <div class="container">
+                        <div class="card">
+                            <div class="card-header">Data Clarification Incidents</div>
+                            <div id="dataClarificationIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-data-correction" role="tabpanel" aria-labelledby="v-pills-data-correction-tab">
+                    <div class="container">
+                        <div class="card">
+                            <div class="card-header">Data Correction Incidents</div>
+                            <div id="dataCorrectionIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="v-pills-data-correction" role="tabpanel" aria-labelledby="v-pills-data-correction-tab">
-                <div class="container">
-                    <div class="card">
-                        <div class="card-header">Data Correction Incidents</div>
-                        <div id="dataCorrectionIncident" style="height: 600px; width:100%;" class="ag-theme-alpine card-body"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-</div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="modalTable" style="height: 330px; width:98%;" class="ag-theme-alpine card-body">
 
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-body">
+                        <div id="modalTable" style="height: 330px; width:98%;" class="ag-theme-alpine card-body">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    </section>
+    <section id="monthly" class="tab-content hide">
+        <div class="container">
+            <div class="row">
+                <div class="align-self-center">
+                    <div style="float: inline-start;margin: 3px;">
+                        <label for="from">From</label>
+                        <input type="text" id="from" name="from" readonly="readonly" />
+                        <label for="to">to</label>
+                        <input type="text" id="to" name="to" readonly="readonly"  />
+                        <input type="button" class="btn btn-primary" id="btnShow" value="Show" />
+                    </div>
+                    <div class="align-self-center" style="float: inline-end;margin: 3px;">
+                        <input type="button" class="btn btn-primary" name="pdfButton" value="Export Pdf" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div id="monthlyReportChart" style="margin:5px;height: 300px; width: 98%"></div>
+                <div class="card-header">Monthly Report Incidents</div>
+                <div id="dataMonthlyReport" style="height: 300px; width:100%;" class="ag-theme-alpine card-body"></div>
+            </div>
+        </div>
+    </section>
+    <section id="daily" class="tab-content hide">
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Excel file input</label>
+            <input class="form-control" type="file" id="formFile">
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="submitFormFile">Submit</button>
+        </div>
 
+        <div id="alert">
+
+        </div>
+    </section>
+</div>
 
 
 </body>

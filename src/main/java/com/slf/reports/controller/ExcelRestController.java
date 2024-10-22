@@ -29,7 +29,7 @@ public class ExcelRestController {
 	@Autowired
 	private SlfReportService slfReportService;
 
-	@PostMapping("excel")
+	@PostMapping(value = "excel",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> excelReader(@RequestParam("file") MultipartFile excel) throws ParseException, IOException {
 		List<ReportDetails> reportDetailsList = slfReportService.saveReportDetails(excel);
 		return new ResponseEntity<>("Excel file imported successfully.", HttpStatus.OK);
@@ -155,9 +155,24 @@ public class ExcelRestController {
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
 
+
+
 	@PostMapping(path="slfReport/{tab}/{priority}/{columnId}/{year}",produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Result> getDetailsOfInc(@PathVariable String tab,@PathVariable String priority,@PathVariable String columnId,@PathVariable int year) {
 		Result result = slfReportService.fetchDetailsOfInc(tab,priority,columnId,year);
+		return new ResponseEntity<Result>(result, HttpStatus.OK);
+	}
+
+
+	@PostMapping(path="slfReport/monthly",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<StackedColumnModel>> getMontlyDetails(@RequestParam String fromDate, @RequestParam String toDate) {
+		List<StackedColumnModel> result = slfReportService.fetchDetailsOfIncident(LocalDate.parse(fromDate), LocalDate.parse(toDate));
+		return new ResponseEntity<List<StackedColumnModel>>(result, HttpStatus.OK);
+	}
+
+	@PostMapping(path="slfReport/data/monthly-details",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Result> getDataMonthlyDetails(@RequestParam String fromDate, @RequestParam String toDate) {
+		Result result = slfReportService.fetchMonthlyDetails(LocalDate.parse(fromDate), LocalDate.parse(toDate));
 		return new ResponseEntity<Result>(result, HttpStatus.OK);
 	}
 
