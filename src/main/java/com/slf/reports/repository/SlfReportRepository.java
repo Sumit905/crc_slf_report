@@ -16,4 +16,8 @@ public interface SlfReportRepository extends CrudRepository<ReportDetails, Long>
 	@Query(value = "from ReportDetails t where date BETWEEN :startDate AND :endDate AND stream= :consumer")
 	List<ReportDetails> findConsumerByDateBetween(@Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate, @Param("consumer") String consumer);
+
+
+	@Query(value = "SELECT DISTINCT p.stream from ReportDetails p")
+	List<String> getAllStreamName();
 }

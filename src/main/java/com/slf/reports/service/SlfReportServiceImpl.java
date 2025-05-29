@@ -35,4 +35,9 @@ public class SlfReportServiceImpl implements SlfReportService {
 		
 		return reportRepository.findConsumerByDateBetween(fromDate,toDate,consumer);
 	}
+
+	@Override
+	public List<String> fetchAllStreamName() {
+		return reportRepository.getAllStreamName();
+	}
 }

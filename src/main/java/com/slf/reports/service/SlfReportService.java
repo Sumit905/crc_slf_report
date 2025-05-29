@@ -15,4 +15,6 @@ public interface SlfReportService {
 	
 	List<ReportDetails> fatchReportDetailsOnBasesOfDateAndConsumer(LocalDate fromDate,LocalDate toDate, String consumer);
 
+	List<String> fetchAllStreamName();
+
 }
